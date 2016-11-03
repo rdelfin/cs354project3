@@ -149,7 +149,7 @@ public:
 	 * renderWithMaterial: render a part of vertex buffer, after binding
 	 * corresponding uniforms for Phong shading.
 	 */
-	bool renderWithMaterial(int i); // return false if material id is invalid
+	bool renderWithMaterial(size_t i); // return false if material id is invalid
 private:
 	void initMaterialUniform();
 	void createMaterialTexture();

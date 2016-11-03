@@ -263,7 +263,7 @@ void RenderPass::setup()
 	bind_uniforms(uniforms_, unilocs_);
 }
 
-bool RenderPass::renderWithMaterial(int mid)
+bool RenderPass::renderWithMaterial(size_t mid)
 {
 	if (mid >= material_uniforms_.size() || mid < 0)
 		return false;
