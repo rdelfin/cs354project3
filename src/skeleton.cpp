@@ -1,8 +1,10 @@
+#include <glm/gtx/transform.hpp>
+#include <unordered_map>
 #include "skeleton.h"
 
 
-Joint::Joint(glm::mat4 origin_rotation, glm::mat4 origin_translation, Joint* parent)
-    : origin_rotation(origin_rotation), origin_translation(origin_translation), rotation(1.0f), translation(1.0f), parent(parent)
+Joint::Joint(glm::vec3 offset, Joint* parent, glm::mat4 translation, glm::mat4 rotation)
+    : offset(glm::vec4(offset, 1.0f)), rotation(rotation), translation(translation), parent(parent)
 {
 
 }
@@ -29,7 +31,7 @@ void Joint::addChild(Joint* child) {
 }
 
 glm::mat4 Joint::transform() {
-    return translation* rotation * origin_translation * origin_rotation;
+    return translation * rotation * glm::translate(glm::vec3(offset));
 }
 
 Joint::~Joint() {
@@ -46,6 +48,38 @@ Skeleton::Skeleton() {
 Skeleton::Skeleton(Joint* root)
     : root(root) {
 
+}
+
+Skeleton::Skeleton(std::vector<glm::vec3> offset, std::vector<int> parent) {
+    std::unordered_map<int, Joint*> indexMap;
+    root = nullptr;
+
+    size_t minSize = std::min(offset.size(), parent.size());
+    for(int i = 0; i < minSize; i++) {
+        int p = parent[i];
+        Joint *joint;
+
+        if(p >= 0) {
+            // Obtain parent pointer if it exists
+            Joint* pPointer = indexMap[p];
+            // Create pointer based on
+            joint = new Joint(offset[i], pPointer);
+            // Added child
+            pPointer->addChild(joint);
+        } else {
+            // Create joint without parent
+            joint = new Joint(offset[i], nullptr);
+            root = joint;
+        }
+        indexMap.insert({i, joint});
+    }
+
+    // Delete entire tree if no root was defined to avoid memory leaks
+    if(root == nullptr) {
+        for (auto it = indexMap.begin(); it != indexMap.end(); ++it) {
+            delete it->second;
+        }
+    }
 }
 
 

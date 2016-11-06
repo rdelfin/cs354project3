@@ -23,7 +23,7 @@ public:
      * @param right The right vector for the joint, defined the same way as the up vector
      * @param parent The parent node of the joint. Null if this is the root node
      */
-    Joint(glm::mat4 origin_rotation, glm::mat4 origin_translation, Joint* parent);
+    Joint(glm::vec3 offset, Joint* parent, glm::mat4 translation = glm::mat4(1.0f), glm::mat4 rotation = glm::mat4(1.0f));
     glm::mat4 transform();
 
     void addChild(Joint*);
@@ -32,7 +32,8 @@ public:
 
     ~Joint();
 private:
-    glm::mat4 origin_rotation, origin_translation, rotation, translation;
+    glm::vec4 offset;
+    glm::mat4 rotation, translation;
 
     Joint* parent;
     std::vector<Joint*> children;
@@ -46,6 +47,7 @@ class Skeleton {
 public:
     Skeleton();
     Skeleton(Joint* root);
+    Skeleton(std::vector<glm::vec3>, std::vector<int>);
 
     glm::vec4 transform(glm::vec4 point, Joint* joint);
     glm::mat4 transform(Joint* joint);
