@@ -69,6 +69,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> offset, std::vector<int> parent) {
         } else {
             // Create joint without parent
             joint = new Joint(offset[i], nullptr);
+            // Therefore, this must be the root
             root = joint;
         }
         indexMap.insert({i, joint});
@@ -85,9 +86,6 @@ Skeleton::Skeleton(std::vector<glm::vec3> offset, std::vector<int> parent) {
 
 glm::mat4 Skeleton::transform(Joint* joint) {
     std::vector<Joint*> path = pathTo(joint);
-
-    if(path.size() == 0)
-        return glm::mat4(1.0f);
 
     glm::mat4 transform(1.0f);
 
