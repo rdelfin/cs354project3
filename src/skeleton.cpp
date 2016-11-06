@@ -32,6 +32,16 @@ glm::mat4 Joint::transform() {
     return translation* rotation * origin_translation * origin_rotation;
 }
 
+Joint::~Joint() {
+    for(auto it = children.begin(); it != children.end(); ++it) {
+        delete *it;
+    }
+}
+
+
+Skeleton::Skeleton() {
+
+}
 
 Skeleton::Skeleton(Joint* root)
     : root(root) {
@@ -61,4 +71,9 @@ glm::vec4 Skeleton::transform(glm::vec4 point, Joint* joint) {
 
 std::vector<Joint*> Skeleton::pathTo(Joint* joint) {
     return root->pathTo(joint);
+}
+
+Skeleton::~Skeleton() {
+    if(root != nullptr)
+        delete root;
 }

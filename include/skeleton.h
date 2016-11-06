@@ -29,6 +29,8 @@ public:
     void addChild(Joint*);
 
     std::vector<Joint*> pathTo(Joint* joint);
+
+    ~Joint();
 private:
     glm::mat4 origin_rotation, origin_translation, rotation, translation;
 
@@ -47,6 +49,8 @@ public:
 
     glm::vec4 transform(glm::vec4 point, Joint* joint);
     glm::mat4 transform(Joint* joint);
+
+    ~Skeleton();
 private:
     Joint* root;
     std::vector<Joint> joints;
