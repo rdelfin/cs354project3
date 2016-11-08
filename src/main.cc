@@ -83,7 +83,9 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
 
-	// FIXME: add code to create bone and cylinder geometry
+	std::vector<glm::vec4> lattice_vertices, lattice_normals;
+	std::vector<glm::uvec3> lattice_faces;
+    create_latice(lattice_vertices, lattice_normals, lattice_faces);
 
 	Mesh mesh;
 	mesh.loadpmd(argv[1]);
