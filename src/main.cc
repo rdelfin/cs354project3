@@ -190,6 +190,17 @@ int main(int argc, char* argv[])
 			{ "fragment_color" }
 			);
 
+    RenderDataInput bone_pass_input;
+    RenderPass bone_pass(-1,
+            bone_pass_input,
+            {
+                /* Shaders */
+            },
+            {
+                 /* Uniforms */
+            },
+            { /* output */ }
+            );
 	// FIXME: Create the RenderPass objects for bones here.
 	//        Otherwise do whatever you like.
 
@@ -233,7 +244,9 @@ int main(int argc, char* argv[])
 #else
 		draw_cylinder = true;
 #endif
-		// FIXME: Draw bones first.
+        if(draw_skeleton) {
+            // FIXME: Draw bones first.
+        }
 		// Then draw floor.
 		if (draw_floor) {
 			floor_pass.setup();

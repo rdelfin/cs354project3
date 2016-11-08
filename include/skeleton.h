@@ -28,6 +28,8 @@ public:
 
     void addChild(Joint*);
 
+    size_t getAllChildCount();
+
     std::vector<Joint*> pathTo(Joint* joint);
 
     ~Joint();
@@ -52,12 +54,18 @@ public:
     glm::vec4 transform(glm::vec4 point, Joint* joint);
     glm::mat4 transform(Joint* joint);
 
+    size_t getNumberOfBones() { return num_bones_cache; }
+
     ~Skeleton();
 private:
     Joint* root;
     std::vector<Joint> joints;
 
     std::vector<Joint*> pathTo(Joint* joint);
+
+    void recomputeBoneCount();
+
+    size_t num_bones_cache;
 };
 
 

@@ -35,8 +35,7 @@ struct Mesh {
 	void updateAnimation();
 	int getNumberOfBones() const 
 	{ 
-		return 0;
-		// FIXME: return number of bones in skeleton
+		return skeleton.getNumberOfBones();
 	}
 	glm::vec3 getCenter() const { return 0.5f * glm::vec3(bounds.min + bounds.max); }
 private:

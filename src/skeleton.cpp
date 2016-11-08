@@ -30,6 +30,15 @@ void Joint::addChild(Joint* child) {
         children.push_back(child);
 }
 
+size_t Joint::getAllChildCount() {
+    size_t count = children.size();
+    for(auto it = children.begin(); it != children.end(); ++it) {
+        count += (*it)->getAllChildCount();
+    }
+
+    return count;
+}
+
 glm::mat4 Joint::transform() {
     return translation * rotation * glm::translate(glm::vec3(offset));
 }
@@ -103,6 +112,13 @@ glm::vec4 Skeleton::transform(glm::vec4 point, Joint* joint) {
 
 std::vector<Joint*> Skeleton::pathTo(Joint* joint) {
     return root->pathTo(joint);
+}
+
+void Skeleton::recomputeBoneCount() {
+    if(root == nullptr)
+        num_bones_cache = 0;
+    else
+        num_bones_cache = root->getAllChildCount();
 }
 
 Skeleton::~Skeleton() {
