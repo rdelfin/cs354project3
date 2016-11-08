@@ -5,13 +5,10 @@ uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 void main() {
-	int n = 0;
-	for (n = 0; n < gl_in.length() - 1; n += 2) {
-        gl_Position = gl_in[n].gl_Position.xyz;
-        EmitVertex();
-        gl_Position = gl_in[n+1].gl_Position.xyz;
-        EmitVertex();
-	    EndPrimitive();
-	}
+    gl_Position = gl_in[0].gl_Position;
+    EmitVertex();
+    gl_Position = gl_in[1].gl_Position;
+    EmitVertex();
+    EndPrimitive();
 }
 )zzz"

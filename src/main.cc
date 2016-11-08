@@ -38,7 +38,17 @@ const char* floor_fragment_shader =
 #include "shaders/floor.frag"
 ;
 
-// FIXME: Add more shaders here.
+const char* skeleton_vertex_shader =
+#include "shaders/skeleton.vert"
+;
+
+const char* skeleton_geometry_shader =
+#include "shaders/skeleton.geom"
+;
+
+const char* skeleton_fragment_shader =
+#include "shaders/skeleton.frag"
+;
 
 void ErrorCallback(int error, const char* description) {
 	std::cerr << "GLFW Error: " << description << "\n";
@@ -86,6 +96,10 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> lattice_vertices, lattice_normals;
 	std::vector<glm::uvec3> lattice_faces;
     create_latice(lattice_vertices, lattice_normals, lattice_faces);
+
+    // Test values
+    std::vector<glm::vec4> skeleton_points = {glm::vec4(-100.0, 10.139, 0.874, 1), glm::vec4(100.0, 10.139, 0.874, 1)};
+    std::vector<glm::uvec2> skeleton_faces = {glm::uvec2(0, 1)};
 
 	Mesh mesh;
 	mesh.loadpmd(argv[1]);
@@ -158,8 +172,7 @@ int main(int argc, char* argv[])
 		else
 			return &non_transparet;
 	};
-	// FIXME: add more lambdas for data_source if you want to use RenderPass.
-	//        Otherwise, do whatever you like here
+
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
@@ -167,8 +180,6 @@ int main(int argc, char* argv[])
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform object_alpha = { "alpha", float_binder, alpha_data };
-	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
-	//        Otherwise, do whatever you like here
 
 	std::vector<glm::vec2>& uv_coordinates = mesh.uv_coordinates;
 	RenderDataInput object_pass_input;
@@ -190,19 +201,23 @@ int main(int argc, char* argv[])
 			{ "fragment_color" }
 			);
 
-    RenderDataInput bone_pass_input;
-    RenderPass bone_pass(-1,
-            bone_pass_input,
+    // Creates the data structure to render the skeleton (not the cylinder bone)
+    RenderDataInput skeleton_pass_input;
+    skeleton_pass_input.assign(0, "vertex_position", nullptr, skeleton_points.size(), 4, GL_FLOAT);
+    skeleton_pass_input.assign_index(&skeleton_faces[0], skeleton_faces.size(), 3);
+    RenderPass skeleton_pass(-1,
+            skeleton_pass_input,
             {
-                /* Shaders */
+                skeleton_vertex_shader,
+                skeleton_geometry_shader,
+                skeleton_fragment_shader
             },
             {
-                 /* Uniforms */
+                std_model, std_view, std_proj
             },
-            { /* output */ }
+            { "fragment_color" }
             );
-	// FIXME: Create the RenderPass objects for bones here.
-	//        Otherwise do whatever you like.
+
 
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
@@ -245,7 +260,9 @@ int main(int argc, char* argv[])
 		draw_cylinder = true;
 #endif
         if(draw_skeleton) {
-            // FIXME: Draw bones first.
+            skeleton_pass.setup();
+
+            CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, 0));
         }
 		// Then draw floor.
 		if (draw_floor) {

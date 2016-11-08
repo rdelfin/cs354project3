@@ -54,7 +54,7 @@ public:
     glm::vec4 transform(glm::vec4 point, Joint* joint);
     glm::mat4 transform(Joint* joint);
 
-    size_t getNumberOfBones() { return num_bones_cache; }
+    size_t getNumberOfBones() const { return num_bones_cache; }
 
     ~Skeleton();
 private:
