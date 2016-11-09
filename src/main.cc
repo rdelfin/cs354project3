@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     // Creates the data structure to render the skeleton (not the cylinder bone)
     RenderDataInput skeleton_pass_input;
     skeleton_pass_input.assign(0, "vertex_position", nullptr, skeleton_points.size(), 4, GL_FLOAT);
-    skeleton_pass_input.assign_index(&skeleton_faces[0], skeleton_faces.size(), 3);
+    skeleton_pass_input.assign_index(skeleton_faces.data(), skeleton_faces.size(), 2);
     RenderPass skeleton_pass(-1,
             skeleton_pass_input,
             {
