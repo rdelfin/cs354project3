@@ -93,9 +93,12 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	create_floor(floor_vertices, floor_faces);
 
-	std::vector<glm::vec4> lattice_vertices, lattice_normals;
-	std::vector<glm::uvec3> lattice_faces;
-    create_latice(lattice_vertices, lattice_normals, lattice_faces);
+	std::vector<glm::vec4> lattice_vertices;
+	std::vector<glm::uvec2> lattice_lines;
+    create_lattice_lines(lattice_vertices, lattice_lines);
+    lattice_vertices.push_back(glm::vec4(-100.0, 10.139, 0.874, 1));
+    lattice_vertices.push_back(glm::vec4(100.0, 10.139, 0.874, 1));
+    lattice_lines.push_back(glm::uvec2(lattice_vertices.size() - 2, lattice_vertices.size() - 1));
 
     // Test values
     std::vector<glm::vec4> skeleton_points = {glm::vec4(-100.0, 10.139, 0.874, 1), glm::vec4(100.0, 10.139, 0.874, 1)};
@@ -214,7 +217,7 @@ int main(int argc, char* argv[])
             skeleton_pass_input,
             {
                 skeleton_vertex_shader,
-                nullptr,//skeleton_geometry_shader,
+                skeleton_geometry_shader,
                 skeleton_fragment_shader
             },
             {
@@ -226,7 +229,7 @@ int main(int argc, char* argv[])
         // Creates the data structure to render the skeleton (not the cylinder bone)
     RenderDataInput lattice_pass_input;
     lattice_pass_input.assign(0, "vertex_position", lattice_vertices.data(), lattice_vertices.size(), 4, GL_FLOAT);
-    lattice_pass_input.assign_index(lattice_faces.data(), lattice_faces.size(), 3);
+    lattice_pass_input.assign_index(lattice_lines.data(), lattice_lines.size(), 2);
     RenderPass lattice_pass(-1,
         lattice_pass_input,
         {
@@ -282,13 +285,13 @@ int main(int argc, char* argv[])
 		draw_cylinder = true;
 #endif
         if(draw_skeleton) {
-            skeleton_pass.setup();
+            //skeleton_pass.setup();
 
-            CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, skeleton_faces.data()));
+            //CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, skeleton_faces.data()));
 
             lattice_pass.setup();
 
-            CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, lattice_faces.size() * 3, GL_UNSIGNED_INT, 0));
+            CHECK_GL_ERROR(glDrawElements(GL_LINES, lattice_lines.size() * 2, GL_UNSIGNED_INT, 0));
         }
 		// Then draw floor.
 		if (draw_floor) {

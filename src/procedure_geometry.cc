@@ -25,7 +25,8 @@ void create_bone_mesh(Skeleton* skeleton) {
 /**
  * Generates a latice in [-0.5, 0, 0] x [0.5, 1, 0] with `detail` vertices per side
  */
-void create_latice(std::vector<glm::vec4>& vertices, std::vector<glm::vec4> normals, std::vector<glm::uvec3>& faces, size_t detail) {
+void create_lattice(std::vector<glm::vec4> &vertices, std::vector<glm::vec4> normals, std::vector<glm::uvec3> &faces,
+                    size_t detail) {
     size_t idx = vertices.size();
     float stepsize = 1.0f / (float)detail;
 
@@ -46,6 +47,27 @@ void create_latice(std::vector<glm::vec4>& vertices, std::vector<glm::vec4> norm
 
             faces.push_back(glm::uvec3(ll, lr, ul));
             faces.push_back(glm::uvec3(lr, ur, ul));
+        }
+    }
+}
+
+void create_lattice_lines(std::vector<glm::vec4> &vertices, std::vector<glm::uvec2> &lines, size_t detail) {
+    size_t offset_idx = vertices.size();
+    float stepsize = 1.0f / (float)detail;
+
+    for(size_t i = 0; i < detail; i++) {
+        for(size_t j = 0; j < detail; j++) {
+            vertices.push_back(glm::vec4(j*stepsize - 0.5f, i*stepsize, 0.0f, 1));
+
+            size_t current_idx = offset_idx + j + i*detail;
+
+            // Not last vertex on Y index
+            if(i < detail - 1)
+                lines.push_back(glm::uvec2(current_idx, current_idx + detail));
+
+            // Not last vertex on X index
+            if(j < detail - 1)
+                lines.push_back(glm::uvec2(current_idx, current_idx + 1));
         }
     }
 }

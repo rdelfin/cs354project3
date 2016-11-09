@@ -9,7 +9,10 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 
 void create_bone_mesh(Skeleton* skeleton);
 
-void create_latice(std::vector<glm::vec4>& vertices, std::vector<glm::vec4> normals, std::vector<glm::uvec3>& faces, size_t detail = 20);
-// FIXME: Add functions to generate the bone mesh.
+void create_lattice(std::vector<glm::vec4> &vertices, std::vector<glm::vec4> normals, std::vector<glm::uvec3> &faces,
+                    size_t detail = 20);
+
+void create_lattice_lines(std::vector<glm::vec4> &vertices, std::vector<glm::uvec2> &lines,
+                    size_t detail = 20);
 
 #endif
