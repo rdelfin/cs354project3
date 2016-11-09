@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 	auto matrix_binder = [](int loc, const void* data) {
 		glUniformMatrix4fv(loc, 1, GL_FALSE, (const GLfloat*)data);
 	};
-	auto bone_matrix_binder = [&mesh](int loc, const void* data) {
+	auto skeleton_matrix_binder = [&mesh](int loc, const void* data) {
 		auto nelem = mesh.getNumberOfBones();
 		glUniformMatrix4fv(loc, nelem, GL_FALSE, (const GLfloat*)data);
 	};
@@ -152,6 +152,10 @@ int main(int argc, char* argv[])
 	auto floor_model_data = [&floor_model_matrix]() -> const void* {
 		return &floor_model_matrix[0][0];
 	}; // This return model matrix for the floor.
+    glm::mat4 skeleton_model_matrix = glm::mat4(1.0f);
+    auto skeleton_model_data = [&skeleton_model_matrix]() -> const void* {
+        return &skeleton_model_matrix[0][0];
+    }; // This return model matrix for the floor.
 	auto std_view_data = [&mats]() -> const void* {
 		return mats.view;
 	};
@@ -175,6 +179,7 @@ int main(int argc, char* argv[])
 
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
+    ShaderUniform skeleton_model = { "model", matrix_binder, skeleton_model_data };
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
 	ShaderUniform std_camera = { "camera_position", vector3_binder, std_camera_data };
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
@@ -203,20 +208,37 @@ int main(int argc, char* argv[])
 
     // Creates the data structure to render the skeleton (not the cylinder bone)
     RenderDataInput skeleton_pass_input;
-    skeleton_pass_input.assign(0, "vertex_position", nullptr, skeleton_points.size(), 4, GL_FLOAT);
+    skeleton_pass_input.assign(0, "vertex_position", skeleton_points.data(), skeleton_points.size(), 4, GL_FLOAT);
     skeleton_pass_input.assign_index(skeleton_faces.data(), skeleton_faces.size(), 2);
     RenderPass skeleton_pass(-1,
             skeleton_pass_input,
             {
                 skeleton_vertex_shader,
-                skeleton_geometry_shader,
+                nullptr,//skeleton_geometry_shader,
                 skeleton_fragment_shader
             },
             {
-                std_model, std_view, std_proj
+                skeleton_model, std_view, std_proj
             },
             { "fragment_color" }
             );
+
+        // Creates the data structure to render the skeleton (not the cylinder bone)
+    RenderDataInput lattice_pass_input;
+    lattice_pass_input.assign(0, "vertex_position", lattice_vertices.data(), lattice_vertices.size(), 4, GL_FLOAT);
+    lattice_pass_input.assign_index(lattice_faces.data(), lattice_faces.size(), 3);
+    RenderPass lattice_pass(-1,
+        lattice_pass_input,
+        {
+             skeleton_vertex_shader,
+             nullptr,//skeleton_geometry_shader,
+             skeleton_fragment_shader
+        },
+        {
+             skeleton_model, std_view, std_proj
+        },
+        { "fragment_color" }
+    );
 
 
 	RenderDataInput floor_pass_input;
@@ -262,13 +284,17 @@ int main(int argc, char* argv[])
         if(draw_skeleton) {
             skeleton_pass.setup();
 
-            CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, 0));
+            CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, skeleton_faces.data()));
+
+            lattice_pass.setup();
+
+            CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, lattice_faces.size() * 3, GL_UNSIGNED_INT, 0));
         }
 		// Then draw floor.
 		if (draw_floor) {
-			floor_pass.setup();
+			//floor_pass.setup();
 			// Draw our triangles.
-			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
+			//CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
