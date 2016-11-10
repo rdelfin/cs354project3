@@ -50,6 +50,7 @@ Joint::~Joint() {
 }
 
 
+
 Skeleton::Skeleton() {
 
 }
@@ -112,6 +113,17 @@ glm::vec4 Skeleton::transform(glm::vec4 point, Joint* joint) {
 
 std::vector<Joint*> Skeleton::pathTo(Joint* joint) {
     return root->pathTo(joint);
+}
+
+void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
+    int idx = points.size();
+
+
+    //points.push_back()
+}
+
+void Skeleton::update_joints(std::vector<glm::vec4>& points) {
+
 }
 
 void Skeleton::recomputeBoneCount() {

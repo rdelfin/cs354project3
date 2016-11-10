@@ -285,9 +285,9 @@ int main(int argc, char* argv[])
 		draw_cylinder = true;
 #endif
         if(draw_skeleton) {
-            //skeleton_pass.setup();
+            skeleton_pass.setup();
 
-            //CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, skeleton_faces.data()));
+            CHECK_GL_ERROR(glDrawElements(GL_LINES, skeleton_faces.size() * 2, GL_UNSIGNED_INT, skeleton_faces.data()));
 
             lattice_pass.setup();
 

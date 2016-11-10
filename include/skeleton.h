@@ -63,6 +63,10 @@ private:
 
     std::vector<Joint*> pathTo(Joint* joint);
 
+    void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
+
+    void update_joints(std::vector<glm::vec4>& points);
+
     void recomputeBoneCount();
 
     size_t num_bones_cache;
