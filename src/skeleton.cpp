@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <queue>
 #include <stack>
+#include <iostream>
 #include "skeleton.h"
 
 
@@ -71,7 +72,10 @@ Skeleton::Skeleton(std::vector<glm::vec3> offset, std::vector<int> parent) {
         int p = parent[i];
         Joint *joint;
 
+        std::cout << "ADDED JOINT(" << i << ") WITH PARENT " << p << " AND OFFSET (" << offset[i].x << ", " << offset[i].y << ", " << offset[i].z << ")" << std::endl;
+
         if(p >= 0) {
+
             // Obtain parent pointer if it exists
             Joint* pPointer = indexMap[p];
             // Create pointer based on
