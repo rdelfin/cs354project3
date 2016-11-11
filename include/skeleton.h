@@ -32,6 +32,9 @@ public:
 
     std::vector<Joint*> pathTo(Joint* joint);
 
+    void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
+    void update_joints(std::vector<glm::vec4>& points);
+
     ~Joint();
 private:
     glm::vec4 offset;
@@ -56,6 +59,9 @@ public:
 
     size_t getNumberOfBones() const { return num_bones_cache; }
 
+    void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
+    void update_joints(std::vector<glm::vec4>& points);
+
     ~Skeleton();
 private:
     Joint* root;
@@ -63,9 +69,6 @@ private:
 
     std::vector<Joint*> pathTo(Joint* joint);
 
-    void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
-
-    void update_joints(std::vector<glm::vec4>& points);
 
     void recomputeBoneCount();
 

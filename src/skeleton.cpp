@@ -43,6 +43,14 @@ glm::mat4 Joint::transform() {
     return translation * rotation * glm::translate(glm::vec3(offset));
 }
 
+void Joint::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
+
+}
+
+void Joint::update_joints(std::vector<glm::vec4>& points) {
+
+}
+
 Joint::~Joint() {
     for(auto it = children.begin(); it != children.end(); ++it) {
         delete *it;
@@ -116,14 +124,16 @@ std::vector<Joint*> Skeleton::pathTo(Joint* joint) {
 }
 
 void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
-    int idx = points.size();
-
-
-    //points.push_back()
+    root->compute_joints(points, lines);
 }
 
 void Skeleton::update_joints(std::vector<glm::vec4>& points) {
+    root->update_joints(points);
+}
 
+void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, Joint* j) {
+    int idx = points.size();
+    j
 }
 
 void Skeleton::recomputeBoneCount() {
