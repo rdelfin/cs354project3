@@ -1,5 +1,7 @@
 #include <glm/gtx/transform.hpp>
 #include <unordered_map>
+#include <queue>
+#include <stack>
 #include "skeleton.h"
 
 
@@ -41,14 +43,6 @@ size_t Joint::getAllChildCount() {
 
 glm::mat4 Joint::transform() {
     return translation * rotation * glm::translate(glm::vec3(offset));
-}
-
-void Joint::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
-
-}
-
-void Joint::update_joints(std::vector<glm::vec4>& points) {
-
 }
 
 Joint::~Joint() {
@@ -105,14 +99,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> offset, std::vector<int> parent) {
 glm::mat4 Skeleton::transform(Joint* joint) {
     std::vector<Joint*> path = pathTo(joint);
 
-    glm::mat4 transform(1.0f);
-
-    // Iterate backwards through the path and compute the total transform
-    for(auto it = path.rbegin(); it != path.rend(); ++it) {
-        transform = (*it)->transform() * transform;
-    }
-
-    return transform;
+    return pathTransform(path);
 }
 
 glm::vec4 Skeleton::transform(glm::vec4 point, Joint* joint) {
@@ -123,17 +110,59 @@ std::vector<Joint*> Skeleton::pathTo(Joint* joint) {
     return root->pathTo(joint);
 }
 
+glm::mat4 Skeleton::pathTransform(const std::vector<Joint*>& path) {
+    glm::mat4 transform(1.0f);
+    // Iterate backwards through the path and compute the total transform
+    for(auto it = path.rbegin(); it != path.rend(); ++it) {
+        transform = (*it)->transform() * transform;
+    }
+
+    return transform;
+}
+
 void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
-    root->compute_joints(points, lines);
+    std::queue<Joint*> jointQueue;
+    std::vector<Joint*> jointPath;
+
+    // Push back joint
+    if(root != nullptr)
+        jointQueue.push(root);
+
+    while(jointQueue.size() > 0) {
+        // Pop out element to process
+        Joint* parent = jointQueue.front();
+        jointQueue.pop();
+
+        // Transform for this path
+        glm::mat4 tmat = pathTransform(jointPath);
+
+        // Index of parent point
+        int pIdx = points.size();
+
+        // Add parent to joint for transform
+        points.push_back(tmat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+        for (auto it = parent->children.begin(); it != parent->children.end(); ++it) {
+            Joint* child = *it;
+
+            lines.push_back(glm::uvec2(pIdx, points.size()));
+            points.push_back(tmat * child->transform() * glm::uvec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+
+            // Add child to work queue
+            jointQueue.push(child);
+        }
+
+        // If the next element is the parent of the current element, the joint path should go "up" by popping out
+        if(jointQueue.front() == parent->parent)
+            jointPath.pop_back();
+    }
+
 }
 
 void Skeleton::update_joints(std::vector<glm::vec4>& points) {
-    root->update_joints(points);
-}
-
-void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, Joint* j) {
-    int idx = points.size();
-    j
+    std::vector<glm::uvec2> lines;
+    compute_joints(points, lines);
 }
 
 void Skeleton::recomputeBoneCount() {

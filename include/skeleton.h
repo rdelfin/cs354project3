@@ -32,11 +32,9 @@ public:
 
     std::vector<Joint*> pathTo(Joint* joint);
 
-    void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
-    void update_joints(std::vector<glm::vec4>& points);
-
     ~Joint();
-private:
+
+//private:
     glm::vec4 offset;
     glm::mat4 rotation, translation;
 
@@ -68,6 +66,7 @@ private:
     std::vector<Joint> joints;
 
     std::vector<Joint*> pathTo(Joint* joint);
+    glm::mat4 pathTransform(const std::vector<Joint*>& path);
 
 
     void recomputeBoneCount();
