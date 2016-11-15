@@ -47,9 +47,7 @@ glm::mat4 Joint::transform() {
 }
 
 Joint::~Joint() {
-    for(auto it = children.begin(); it != children.end(); ++it) {
-        delete *it;
-    }
+
 }
 
 
@@ -64,53 +62,35 @@ Skeleton::Skeleton(Joint* root)
 }
 
 Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent) {
-    std::unordered_map<int, Joint*> indexMap;
     root = nullptr;
 
     size_t minSize = std::min(offset.size(), parent.size());
     for(int i = 0; i < minSize; i++) {
         int p = parent[i];
-        Joint *joint;
+        joints.push_back(Joint(offset[i], nullptr));
+        Joint* joint = &joints[joints.size() - 1];
 
-        //std::cout << "ADDED JOINT(" << i << ") WITH PARENT " << p << " AND OFFSET (" << offset[i].x << ", " << offset[i].y << ", " << offset[i].z << ")" << std::endl;
-
-        if(p >= 0) {
-            // Create pointer with no parent. It will be determined afterwards
-            joint = new Joint(offset[i], nullptr);
-            //std::cout << "Parent children length: " << pPointer->children.size() << std::endl;
-        } else {
-            // Create joint without parent
-            joint = new Joint(offset[i], nullptr);
+        if(p < 0) {
             // Therefore, this must be the root
             root = joint;
-
-            std::cout << "Root pointer: " << root << std::endl;
         }
-        indexMap.insert({i, joint});
     }
 
-    std::cout << "Index map has " << indexMap.size() << " elements. Offset has " << offset.size() << " elements" << std::endl;
+    for(int i = 0; i < minSize; i++) {
+        int parentIdx = parent[i];
 
-    for(auto it = indexMap.begin(); it != indexMap.end(); ++it) {
-        int parentIdx = parent[it->first];
         if(parentIdx >= 0) {
-            Joint* pPointer = indexMap[parentIdx];
-            pPointer->addChild(it->second);
-            if(pPointer->children.size() != 0)
-                std::cout << "CHILD SIZE " << pPointer->children.size() << " for index " << it->first << std::endl;
-            it->second->parent = pPointer;
-        }
-    }
+            Joint* pPointer = &joints[parentIdx];
 
-    for(auto it = indexMap.begin(); it != indexMap.end(); ++it) {
-        std::cout << "[" << it->first << "] has " << it->second->children.size() << " children" << std::endl;
+            pPointer->addChild(&joints[i]);
+            joints[i].parent = pPointer;
+        }
     }
 
     // Delete entire tree if no root was defined to avoid memory leaks
     if(root == nullptr) {
-        for (auto it = indexMap.begin(); it != indexMap.end(); ++it) {
-            delete it->second;
-        }
+        std::cerr << "ERROR. NO ROOT FOUND" << std::endl;
+        joints.clear();
     }
 }
 
@@ -143,8 +123,6 @@ void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::u
     std::queue<Joint*> jointQueue;
     std::vector<Joint*> jointPath;
 
-    std::cout << "Root pointer (pt 2): " << root << std::endl;
-
     // Push back joint
     if(root != nullptr)
         jointQueue.push(root);
@@ -162,9 +140,6 @@ void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::u
 
         // Add parent to joint for transform
         points.push_back(tmat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-        std::cout << "Parent children length: " << parent->children.size() << std::endl;
-        std::cout << "Parent pointer: " << parent << std::endl;
 
         for (auto it = parent->children.begin(); it != parent->children.end(); ++it) {
             Joint* child = *it;
@@ -197,6 +172,5 @@ void Skeleton::recomputeBoneCount() {
 }
 
 Skeleton::~Skeleton() {
-    if(root != nullptr)
-        delete root;
+
 }
