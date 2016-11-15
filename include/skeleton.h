@@ -50,7 +50,7 @@ class Skeleton {
 public:
     Skeleton();
     Skeleton(Joint* root);
-    Skeleton(std::vector<glm::vec3> offset, std::vector<int> parent);
+    Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent);
 
     glm::vec4 transform(glm::vec4 point, Joint* joint);
     glm::mat4 transform(Joint* joint);
