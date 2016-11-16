@@ -137,7 +137,7 @@ void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::u
         glm::mat4 tmat = pathTransform(jointPath);
 
         // Index of parent point
-        int pIdx = points.size();
+        size_t pIdx = points.size();
 
         // Add parent to joint for transform
         points.push_back(tmat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
