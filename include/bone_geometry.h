@@ -29,7 +29,7 @@ struct Mesh {
 	std::vector<glm::vec2> uv_coordinates;
 	std::vector<Material> materials;
 	BoundingBox bounds;
-	Skeleton skeleton;
+	Skeleton* skeleton;
 
 	void loadpmd(const std::string& fn);
 	void updateAnimation();
