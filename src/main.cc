@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
               << " vertices and " << mesh.faces.size() << " faces.\n";
 
     // Load up skeleton
-    mesh.skeleton.compute_joints(skeleton_vertices, skeleton_lines);
+    //mesh.skeleton.compute_joints(skeleton_vertices, skeleton_lines);
 
     std::cout << "There are " << skeleton_vertices.size() << " vertices and " << skeleton_lines.size() << " lines" << std::endl;
 

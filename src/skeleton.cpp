@@ -28,9 +28,10 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
 
     // n: first, set to t and replace smallest element with t. Then n = cross(n,t)
     n = t;
-    if(n.x < n.y && n.x < n.z) n.x = 1;
-    else if(n.y < n.x && n.y < n.z) n.y = 1;
-    else n.z = 1;
+    if(n.x < n.y && n.x < n.z) n = glm::vec3(1.0f, 0.0f, 0.0f);
+    else if(n.y < n.x && n.y < n.z) n = glm::vec3(0.0f, 1.0f, 0.0f);
+    else n = glm::vec3(0.0f, 0.0f, 1.0f);
+
     n = glm::normalize(glm::cross(t, n));
 
     b = glm::cross(t, n);
@@ -39,7 +40,6 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
     rot[1] = glm::vec4(n, 0.0f);
     rot[2] = glm::vec4(b, 0.0f);
     rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    rot = glm::transpose(rot);
 
     trans = glm::translate(glm::vec3(length, 0.0f, 0.0f));
 }
@@ -50,6 +50,20 @@ void Bone::addChild(Bone* child) {
 
 void Bone::addChildren(std::vector<Bone*> child) {
     children.insert(children.end(), child.begin(), child.end());
+}
+
+void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
+    glm::vec4 startPoint = parentTransform * trans * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 endPoint = parentTransform * trans * rot * glm::vec4(0.0f, 0.0f, length, 1.0f);
+
+    lines.push_back(glm::uvec2(points.size(), points.size() + 1));
+    points.push_back(startPoint);
+    points.push_back(endPoint);
+
+    for(auto it = children.begin(); it != children.end(); ++it) {
+        Bone* child = *it;
+        child->compute_joints_r(points, lines, parentTransform * trans * rot);
+    }
 }
 
 Bone::~Bone() {
@@ -118,7 +132,7 @@ std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int root
 
 
 void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
-
+    root->compute_joints_r(points, lines, glm::mat4(1.0f));
 }
 
 void Skeleton::update_joints(std::vector<glm::vec4>& points) {

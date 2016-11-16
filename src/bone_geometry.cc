@@ -56,7 +56,7 @@ void Mesh::loadpmd(const std::string& fn)
         parents.push_back(parent);
     }
 
-    skeleton = Skeleton(offsets, parents);
+    //skeleton = Skeleton(offsets, parents);
 
     // TODO: add blend weights from PMD file
 }

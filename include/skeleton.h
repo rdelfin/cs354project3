@@ -30,6 +30,8 @@ public:
     void addChild(Bone* child);
     void addChildren(std::vector<Bone*> child);
 
+    void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
+
     ~Bone();
 
 private:
