@@ -105,6 +105,8 @@ int main(int argc, char* argv[]) {
     // Load up skeleton
     mesh.skeleton.compute_joints(skeleton_vertices, skeleton_lines);
 
+    std::cout << "There are " << skeleton_vertices.size() << " vertices and " << skeleton_lines.size() << " lines" << std::endl;
+
     glm::vec4 mesh_center = glm::vec4(0.0f);
     for (size_t i = 0; i < mesh.vertices.size(); ++i) {
         mesh_center += mesh.vertices[i];

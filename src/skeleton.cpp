@@ -128,6 +128,7 @@ void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::u
         jointQueue.push(root);
 
     while(jointQueue.size() > 0) {
+        std::cout << "RUN" << std::endl;
         // Pop out element to process
         Joint* parent = jointQueue.front();
         jointQueue.pop();
@@ -140,6 +141,8 @@ void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::u
 
         // Add parent to joint for transform
         points.push_back(tmat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+        std::cout << "Adding " << parent->children.size() << " children" << std::endl;
 
         for (auto it = parent->children.begin(); it != parent->children.end(); ++it) {
             Joint* child = *it;
