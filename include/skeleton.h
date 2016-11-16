@@ -11,35 +11,36 @@
 
 
 /**
- * Class that represents the individual nodes in the skeleton DAG
+ * Class that represents the individual nodes in the skeleton tree
  */
 class Joint {
 public:
-    /**
-     * Creates the joint with coordinates relative to the parent. If there is no parent, the coordinates are in
-     * world coordinates.
-     * @param origin The position offset relative to the parent
-     * @param up The up vector for the joint, where (0, 1, 0) is the up vector for the parent
-     * @param right The right vector for the joint, defined the same way as the up vector
-     * @param parent The parent node of the joint. Null if this is the root node
-     */
-    Joint(glm::vec3 offset, Joint* parent, glm::mat4 translation = glm::mat4(1.0f), glm::mat4 rotation = glm::mat4(1.0f));
-    glm::mat4 transform();
-
-    void addChild(Joint*);
-
-    size_t getAllChildCount();
-
-    std::vector<Joint*> pathTo(Joint* joint);
+    Joint(glm::vec3 offset, int parent);
 
     ~Joint();
 
-//private:
-    glm::vec4 offset;
-    glm::mat4 rotation, translation;
+    glm::vec3 offset;
+    int parent;
+};
 
-    Joint* parent;
-    std::vector<Joint*> children;
+class Bone {
+public:
+    Bone(Joint* start, Joint* end, Bone* parent);
+
+    void addChild(Bone* child);
+    void addChildren(std::vector<Bone*> child);
+
+    ~Bone();
+
+private:
+    Joint *startJoint, *endJoint;
+
+    Bone* parent;
+    double length;
+    std::vector<Bone*> children;
+
+    glm::vec3 t, n, b;
+    glm::mat4 trans, rot;
 };
 
 
@@ -49,29 +50,17 @@ public:
 class Skeleton {
 public:
     Skeleton();
-    Skeleton(Joint* root);
+    Skeleton(Bone* root);
     Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent);
 
-    glm::vec4 transform(glm::vec4 point, Joint* joint);
-    glm::mat4 transform(Joint* joint);
-
-    size_t getNumberOfBones() const { return num_bones_cache; }
+    std::vector<Bone*> initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone);
 
     void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
     void update_joints(std::vector<glm::vec4>& points);
 
     ~Skeleton();
 private:
-    Joint* root;
-    std::vector<Joint> joints;
-
-    std::vector<Joint*> pathTo(Joint* joint);
-    glm::mat4 pathTransform(const std::vector<Joint*>& path);
-
-
-    void recomputeBoneCount();
-
-    size_t num_bones_cache;
+    Bone* root;
 };
 
 

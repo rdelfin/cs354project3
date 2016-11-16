@@ -5,175 +5,128 @@
 #include <iostream>
 #include "skeleton.h"
 
+/*======================================================================
+ *============================ JOINT ===================================
+ *======================================================================*/
+Joint::Joint(glm::vec3 offset, int parent)
+    : offset(glm::vec4(offset, 1.0f)), parent(parent) { }
 
-Joint::Joint(glm::vec3 offset, Joint* parent, glm::mat4 translation, glm::mat4 rotation)
-    : offset(glm::vec4(offset, 1.0f)), rotation(rotation), translation(translation), parent(parent)
-{
+Joint::~Joint() { }
 
+
+
+/*======================================================================
+ *============================== BONE ==================================
+ *======================================================================*/
+
+Bone::Bone(Joint* start, Joint* end, Bone* parent)
+    : startJoint(start), endJoint(end), parent(parent), rot(1.0f), trans(1.0f) {
+    length = glm::length(endJoint->offset);
+
+    // t: vector between both endpoints
+    t = glm::normalize(endJoint->offset);
+
+    // n: first, set to t and replace smallest element with t. Then n = cross(n,t)
+    n = t;
+    if(n.x < n.y && n.x < n.z) n.x = 1;
+    else if(n.y < n.x && n.y < n.z) n.y = 1;
+    else n.z = 1;
+    n = glm::normalize(glm::cross(t, n));
+
+    b = glm::cross(t, n);
+
+    rot[0] = glm::vec4(t, 0.0f);
+    rot[1] = glm::vec4(n, 0.0f);
+    rot[2] = glm::vec4(b, 0.0f);
+    rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    rot = glm::transpose(rot);
+
+    trans = glm::translate(glm::vec3(length, 0.0f, 0.0f));
 }
 
-std::vector<Joint*> Joint::pathTo(Joint *joint) {
-    if(this == joint)
-        return { this };
-
-    for(auto it = children.begin(); it != children.end(); ++it) {
-        std::vector<Joint*> childPath = (*it)->pathTo(joint);
-        if(childPath.size() != 0) {
-            childPath.push_back(this);
-            return childPath;
-        }
-    }
-
-    return std::vector<Joint*>();
-
+void Bone::addChild(Bone* child) {
+    children.push_back(child);
 }
 
-void Joint::addChild(Joint* child) {
-    if(child != nullptr)
-        children.push_back(child);
+void Bone::addChildren(std::vector<Bone*> child) {
+    children.insert(children.end(), child.begin(), child.end());
 }
 
-size_t Joint::getAllChildCount() {
-    size_t count = children.size();
-    for(auto it = children.begin(); it != children.end(); ++it) {
-        count += (*it)->getAllChildCount();
-    }
+Bone::~Bone() {
+    for(auto it = children.begin(); it != children.end(); ++it)
+        delete (*it);
 
-    return count;
-}
-
-glm::mat4 Joint::transform() {
-    return translation * rotation * glm::translate(glm::vec3(offset));
-}
-
-Joint::~Joint() {
-
+    if(children.size() == 0)
+        delete endJoint;
+    delete startJoint;
 }
 
 
+
+/*======================================================================
+ *========================== SKELETON ==================================
+ *======================================================================*/
 
 Skeleton::Skeleton() {
 
 }
 
-Skeleton::Skeleton(Joint* root)
+Skeleton::Skeleton(Bone* root)
     : root(root) {
 
 }
 
 Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent) {
+    std::vector<Joint*> joints;
+    size_t rootJointIdx;
     root = nullptr;
 
-    size_t minSize = std::min(offset.size(), parent.size());
-    for(int i = 0; i < minSize; i++) {
-        int p = parent[i];
-        joints.push_back(Joint(offset[i], nullptr));
-        Joint* joint = &joints[joints.size() - 1];
 
-        if(p < 0) {
-            // Therefore, this must be the root
-            root = joint;
+    size_t maxSize = std::max(offset.size(), parent.size());
+    for(size_t i = 0; i < maxSize; i++) {
+        joints.push_back(new Joint(offset[i], parent[i]));
+        if(parent[i] == -1) {
+            rootJointIdx = joints.size() - 1;
         }
     }
 
-    for(int i = 0; i < minSize; i++) {
-        int parentIdx = parent[i];
+    root = initializeBone(joints, rootJointIdx, nullptr)[0];
+}
 
-        if(parentIdx >= 0) {
-            Joint* pPointer = &joints[parentIdx];
+std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone) {
+    Joint* currJoint = joints[rootJointIdx];
+    Joint* nextJoint = nullptr;
 
-            pPointer->addChild(&joints[i]);
-            joints[i].parent = pPointer;
+    std::vector<Bone*> result;
+
+    for(size_t i = 0; i < joints.size(); i++) {
+        Joint* j = joints[i];
+        if(j->parent == currJoint->parent) {
+            nextJoint = j;
+
+            Bone* currBone = new Bone(currJoint, nextJoint, rootBone);
+
+            // Create the child bone before creating this one
+            currBone->addChildren(initializeBone(joints, i, currBone));
         }
+
+        i++;
     }
 
-    // Delete entire tree if no root was defined to avoid memory leaks
-    if(root == nullptr) {
-        std::cerr << "ERROR. NO ROOT FOUND" << std::endl;
-        joints.clear();
-    }
+    return result;
 }
 
-
-glm::mat4 Skeleton::transform(Joint* joint) {
-    std::vector<Joint*> path = pathTo(joint);
-
-    return pathTransform(path);
-}
-
-glm::vec4 Skeleton::transform(glm::vec4 point, Joint* joint) {
-    return transform(joint) * point;
-}
-
-std::vector<Joint*> Skeleton::pathTo(Joint* joint) {
-    return root->pathTo(joint);
-}
-
-glm::mat4 Skeleton::pathTransform(const std::vector<Joint*>& path) {
-    glm::mat4 transform(1.0f);
-    // Iterate backwards through the path and compute the total transform
-    for(auto it = path.rbegin(); it != path.rend(); ++it) {
-        transform = (*it)->transform() * transform;
-    }
-
-    return transform;
-}
 
 void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
-    std::queue<Joint*> jointQueue;
-    std::vector<Joint*> jointPath;
-
-    // Push back joint
-    if(root != nullptr)
-        jointQueue.push(root);
-
-    while(jointQueue.size() > 0) {
-        std::cout << "RUN" << std::endl;
-        // Pop out element to process
-        Joint* parent = jointQueue.front();
-        jointQueue.pop();
-
-        // Transform for this path
-        glm::mat4 tmat = pathTransform(jointPath);
-
-        // Index of parent point
-        size_t pIdx = points.size();
-
-        // Add parent to joint for transform
-        points.push_back(tmat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-        std::cout << "Adding " << parent->children.size() << " children" << std::endl;
-
-        for (auto it = parent->children.begin(); it != parent->children.end(); ++it) {
-            Joint* child = *it;
-
-            lines.push_back(glm::uvec2(pIdx, points.size()));
-            points.push_back(tmat * child->transform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-
-
-            // Add child to work queue
-            jointQueue.push(child);
-        }
-
-        // If the next element is the parent of the current element, the joint path should go "up" by popping out
-        if(jointQueue.front() == parent->parent)
-            jointPath.pop_back();
-    }
 
 }
 
 void Skeleton::update_joints(std::vector<glm::vec4>& points) {
+    points.clear();
     std::vector<glm::uvec2> lines;
     compute_joints(points, lines);
 }
 
-void Skeleton::recomputeBoneCount() {
-    if(root == nullptr)
-        num_bones_cache = 0;
-    else
-        num_bones_cache = root->getAllChildCount();
-}
-
 Skeleton::~Skeleton() {
-
+    delete root;
 }
