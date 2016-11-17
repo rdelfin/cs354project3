@@ -28,18 +28,19 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
 
     // n: first, set to t and replace smallest element with t. Then n = cross(n,t)
     n = t;
-    if(n.x < n.y && n.x < n.z) n = glm::vec3(1.0f, 0.0f, 0.0f);
-    else if(n.y < n.x && n.y < n.z) n = glm::vec3(0.0f, 1.0f, 0.0f);
+    if(std::abs(n.x) <= std::abs(n.y) && std::abs(n.x) <= std::abs(n.z)) n = glm::vec3(1.0f, 0.0f, 0.0f);
+    else if(std::abs(n.y) <= std::abs(n.x) && std::abs(n.y) <= std::abs(n.z)) n = glm::vec3(0.0f, 1.0f, 0.0f);
     else n = glm::vec3(0.0f, 0.0f, 1.0f);
 
     n = glm::normalize(glm::cross(t, n));
 
-    b = glm::cross(t, n);
+    b = glm::normalize(glm::cross(t, n));
 
     rot[0] = glm::vec4(t, 0.0f);
-    rot[1] = glm::vec4(n, 0.0f);
+    rot[1] = glm::vec4(n , 0.0f);
     rot[2] = glm::vec4(b, 0.0f);
     rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    rot = glm::transpose(rot);
 
     trans = glm::translate(glm::vec3(length, 0.0f, 0.0f));
 }

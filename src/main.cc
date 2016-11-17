@@ -93,9 +93,6 @@ int main(int argc, char* argv[]) {
 
     std::vector<glm::vec4> skeleton_vertices;
     std::vector<glm::uvec2> skeleton_lines;
-    skeleton_vertices.push_back(glm::vec4(-100.0, 10.139, 0.874, 1));
-    skeleton_vertices.push_back(glm::vec4(100.0, 10.139, 0.874, 1));
-    skeleton_lines.push_back(glm::uvec2(skeleton_vertices.size() - 2, skeleton_vertices.size() - 1));
 
     Mesh mesh;
     mesh.loadpmd(argv[1]);
