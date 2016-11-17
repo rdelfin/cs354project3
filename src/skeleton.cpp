@@ -55,7 +55,7 @@ void Bone::addChildren(std::vector<Bone*> child) {
 
 void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
     glm::vec4 startPoint = parentTransform * trans * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    glm::vec4 endPoint = parentTransform * trans * rot * glm::vec4(0.0f, 0.0f, length, 1.0f);
+    glm::vec4 endPoint = parentTransform * trans * rot * glm::vec4(length, 0.0f, 0.0f, 1.0f);
 
     lines.push_back(glm::uvec2(points.size(), points.size() + 1));
     points.push_back(startPoint);
