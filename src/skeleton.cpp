@@ -40,9 +40,9 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
     rot[1] = glm::vec4(n , 0.0f);
     rot[2] = glm::vec4(b, 0.0f);
     rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    rot = glm::transpose(rot);
+    //rot = glm::transpose(rot);
 
-    trans = glm::translate(glm::vec3(length, 0.0f, 0.0f));
+    trans = glm::translate(glm::vec3(glm::length(startJoint->offset), 0.0f, 0.0f));
 }
 
 void Bone::addChild(Bone* child) {
