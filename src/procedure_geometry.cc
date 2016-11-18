@@ -4,12 +4,12 @@
 
 void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3>& floor_faces)
 {
-	floor_vertices.push_back(glm::vec4(kFloorXMin, kFloorY, kFloorZMax, 1.0f));
-	floor_vertices.push_back(glm::vec4(kFloorXMax, kFloorY, kFloorZMax, 1.0f));
-	floor_vertices.push_back(glm::vec4(kFloorXMax, kFloorY, kFloorZMin, 1.0f));
-	floor_vertices.push_back(glm::vec4(kFloorXMin, kFloorY, kFloorZMin, 1.0f));
-	floor_faces.push_back(glm::uvec3(0, 1, 2));
-	floor_faces.push_back(glm::uvec3(2, 3, 0));
+    floor_vertices.push_back(glm::vec4(kFloorXMin, kFloorY, kFloorZMax, 1.0f));
+    floor_vertices.push_back(glm::vec4(kFloorXMax, kFloorY, kFloorZMax, 1.0f));
+    floor_vertices.push_back(glm::vec4(kFloorXMax, kFloorY, kFloorZMin, 1.0f));
+    floor_vertices.push_back(glm::vec4(kFloorXMin, kFloorY, kFloorZMin, 1.0f));
+    floor_faces.push_back(glm::uvec3(0, 1, 2));
+    floor_faces.push_back(glm::uvec3(2, 3, 0));
 }
 
 void create_bone_mesh(Skeleton* skeleton) {
@@ -40,9 +40,9 @@ void create_lattice(std::vector<glm::vec4> &vertices, std::vector<glm::vec4> nor
     for(size_t i = 0; i < detail - 1; i++) {
         for(size_t j = 0; j < detail - 1; j++) {
             size_t ll = idx + j + i*detail,
-                ul = idx + j + (i+1)*detail,
-                lr = idx + (j + 1) + i*detail,
-                ur = idx + (j + 1) + (i + 1)*detail;
+                    ul = idx + j + (i+1)*detail,
+                    lr = idx + (j + 1) + i*detail,
+                    ur = idx + (j + 1) + (i + 1)*detail;
 
 
             faces.push_back(glm::uvec3(ll, lr, ul));
