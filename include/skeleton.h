@@ -30,6 +30,10 @@ public:
     void addChild(Bone* child);
     void addChildren(std::vector<Bone*> child);
 
+    glm::mat4 transform();
+    glm::mat4 totalRotate();
+    glm::mat4 totalTranslate();
+
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
 
     ~Bone();
@@ -41,8 +45,10 @@ private:
     double length;
     std::vector<Bone*> children;
 
+    void updateBasis();
+
     glm::vec3 t, n, b;
-    glm::mat4 trans, rot;
+    glm::mat4 trans, rot, totM;
 };
 
 
