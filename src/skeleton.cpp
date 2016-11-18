@@ -53,10 +53,6 @@ void Bone::updateBasis() {
     rot[1] = glm::vec4(n, 0.0f);
     rot[2] = glm::vec4(t, 0.0f);
     rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    //rot = glm::transpose(rot);
-
-    totM = trans * rot;
-
 }
 
 void Bone::addChild(Bone* child) {
@@ -73,7 +69,7 @@ glm::mat4 Bone::transform() {
     if(parent != nullptr)
         result  = parent->transform() * result;
 
-    return result * totM;
+    return result * trans * rot;
 }
 
 
