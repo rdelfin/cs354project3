@@ -38,6 +38,8 @@ public:
 
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
 
+    float getLength() { return length; }
+
     ~Bone();
 
 private:
@@ -46,7 +48,7 @@ private:
     Joint *startJoint, *endJoint;
 
     Bone* parent;
-    double length;
+    float length;
     std::vector<Bone*> children;
 
     void updateBasis();
@@ -75,6 +77,10 @@ public:
     Bone* intersectingBone(glm::vec3 s, glm::vec3 dir, float r);
 
     Bone* getBone(size_t idx);
+
+    int getNumberOfBones() {
+        return boneList.size();
+    }
 
     ~Skeleton();
 private:

@@ -32,7 +32,7 @@ void create_lattice(std::vector<glm::vec4> &vertices, std::vector<glm::vec4> nor
 
     for(size_t i = 0; i < detail; i++) {
         for(size_t j = 0; j < detail; j++) {
-            vertices.push_back(glm::vec4(j*stepsize - 0.5f, i*stepsize, 0.0f, 1));
+            vertices.push_back(glm::vec4(0.0f, i*stepsize, j*stepsize, 1));
             normals.push_back(glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f));
         }
     }
@@ -55,18 +55,18 @@ void create_lattice_lines(std::vector<glm::vec4> &vertices, std::vector<glm::uve
     size_t offset_idx = vertices.size();
     float stepsize = 1.0f / (float)detail;
 
-    for(size_t i = 0; i < detail; i++) {
-        for(size_t j = 0; j < detail; j++) {
-            vertices.push_back(glm::vec4(j*stepsize, i*stepsize, 0.0f, 1));
+    for(size_t i = 0; i <= detail; i++) {
+        for(size_t j = 0; j <= detail; j++) {
+            vertices.push_back(glm::vec4(0.0f, i*stepsize, j*stepsize, 1));
 
-            size_t current_idx = offset_idx + j + i*detail;
+            size_t current_idx = offset_idx + j + i*(detail+1);
 
             // Not last vertex on Y index
-            if(i < detail - 1)
-                lines.push_back(glm::uvec2(current_idx, current_idx + detail));
+            if(i < detail)
+                lines.push_back(glm::uvec2(current_idx, current_idx + (detail+1)));
 
             // Not last vertex on X index
-            if(j < detail - 1)
+            if(j < detail)
                 lines.push_back(glm::uvec2(current_idx, current_idx + 1));
         }
     }

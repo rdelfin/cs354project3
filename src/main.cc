@@ -193,10 +193,21 @@ int main(int argc, char* argv[]) {
     auto radius_data = []() -> const void* {
         return &kCylinderRadius;
     };
+    auto bone_model_data = [&gui, &mesh]() -> const void* {
+        int idx = gui.getCurrentBone();
+        static const glm::mat4 identity(1.0f);
+        static glm::mat4 currentMat(1.0f);
+        if(idx < 0)
+            return &identity;
+        Bone* bone = mesh.skeleton->getBone(idx);
+        currentMat = bone->transform() * glm::scale(glm::vec3(1, 1, bone->getLength()));
+        return &currentMat;
+    };
 
     ShaderUniform std_model = {"model", matrix_binder, std_model_data};
     ShaderUniform floor_model = {"model", matrix_binder, floor_model_data};
     ShaderUniform skeleton_model = {"model", matrix_binder, skeleton_model_data};
+    ShaderUniform bone_model = {"model", matrix_binder, bone_model_data};
     ShaderUniform std_view = {"view", matrix_binder, std_view_data};
     ShaderUniform std_camera = {"camera_position", vector3_binder, std_camera_data};
     ShaderUniform std_proj = {"projection", matrix_binder, std_proj_data};
@@ -263,7 +274,7 @@ int main(int argc, char* argv[]) {
                                      bone_frag_shader
                              },
                              {
-                                     skeleton_model, std_view, std_proj, cylinder_radius
+                                     bone_model, std_view, std_proj, cylinder_radius
                              },
                              {"fragment_color"}
     );
@@ -296,7 +307,7 @@ int main(int argc, char* argv[]) {
         mats = gui.getMatrixPointers();
 
         int current_bone = gui.getCurrentBone();
-#if 0
+#if 1
         draw_cylinder = (current_bone != -1 && gui.isTransparent());
 #else
         draw_cylinder = true;
