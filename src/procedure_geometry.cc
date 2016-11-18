@@ -57,7 +57,7 @@ void create_lattice_lines(std::vector<glm::vec4> &vertices, std::vector<glm::uve
 
     for(size_t i = 0; i < detail; i++) {
         for(size_t j = 0; j < detail; j++) {
-            vertices.push_back(glm::vec4(j*stepsize - 0.5f, i*stepsize, 0.0f, 1));
+            vertices.push_back(glm::vec4(j*stepsize, i*stepsize, 0.0f, 1));
 
             size_t current_idx = offset_idx + j + i*detail;
 

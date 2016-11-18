@@ -8,16 +8,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
-namespace {
-    // Intersect a cylinder with radius 1/2, height 1, with base centered at
-    // (0, 0, 0) and up direction (0, 1, 0).
-    bool IntersectCylinder(const glm::vec3 &origin, const glm::vec3 &direction,
-                           float radius, float height, float* t) {
-
-        return true;
-    }
-}
-
 GUI::GUI(GLFWwindow* window)
         : window_(window) {
     glfwSetWindowUserPointer(window_, this);
