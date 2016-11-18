@@ -74,6 +74,8 @@ public:
 
     Bone* intersectingBone(glm::vec3 s, glm::vec3 dir, float r);
 
+    Bone* getBone(size_t idx);
+
     ~Skeleton();
 private:
     Bone* root;
