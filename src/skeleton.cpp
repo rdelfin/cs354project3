@@ -37,7 +37,7 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
     b = glm::normalize(glm::cross(t, n));
 
     rot[0] = glm::vec4(t, 0.0f);
-    rot[1] = glm::vec4(n , 0.0f);
+    rot[1] = glm::vec4(n, 0.0f);
     rot[2] = glm::vec4(b, 0.0f);
     rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     //rot = glm::transpose(rot);
@@ -84,12 +84,10 @@ Bone::~Bone() {
 
 Skeleton::Skeleton()
     : root(nullptr) {
-    std::cout << "Constructor" << std::endl;
 }
 
 Skeleton::Skeleton(Bone* root)
     : root(root) {
-    std::cout << "Constructor" << std::endl;
 }
 
 Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent) {
