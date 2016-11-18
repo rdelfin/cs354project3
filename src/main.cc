@@ -323,9 +323,9 @@ int main(int argc, char* argv[]) {
         }
         // Then draw floor.
         if (draw_floor) {
-            //floor_pass.setup();
+            floor_pass.setup();
             // Draw our triangles.
-            //CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
+            CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
         }
         if (draw_object) {
             if (gui.isPoseDirty()) {
