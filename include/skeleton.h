@@ -46,6 +46,8 @@ private:
     std::vector<Bone*> children;
 
     void updateBasis();
+    glm::vec4 startWorld();
+    glm::vec4 endWorld();
 
     glm::vec3 t, n, b;
     glm::mat4 trans, rot, totM;
