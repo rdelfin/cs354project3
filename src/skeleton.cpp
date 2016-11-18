@@ -216,7 +216,7 @@ std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int root
 }
 
 Bone* Skeleton::intersectingBone(glm::vec3 s, glm::vec3 dir, float r) {
-    float finalT = std::numeric_limits::infinity();
+    float finalT = std::numeric_limits<float>::infinity();
     Bone* result = nullptr;
 
     for(auto it = boneList.begin(); it != boneList.end(); ++it) {

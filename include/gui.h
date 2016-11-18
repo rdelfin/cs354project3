@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 
+class Bone;
 class Mesh;
 
 /*
@@ -50,6 +51,7 @@ private:
     bool fps_mode_ = false;
     bool pose_changed_ = true;
     bool transparent_ = false;
+    Bone* current_bone_ptr = nullptr;
     int current_bone_ = -1;
     int current_button_ = -1;
     float roll_speed_ = 0.1;
