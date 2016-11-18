@@ -23,7 +23,7 @@ void create_bone_mesh(Skeleton* skeleton) {
 // nice wireframe.
 
 /**
- * Generates a latice in [-0.5, 0, 0] x [0.5, 1, 0] with `detail` vertices per side
+ * Generates a latice in [0, 0, 0] x [1, 1, 0] with `detail` vertices per side
  */
 void create_lattice(std::vector<glm::vec4> &vertices, std::vector<glm::vec4> normals, std::vector<glm::uvec3> &faces,
                     size_t detail) {
