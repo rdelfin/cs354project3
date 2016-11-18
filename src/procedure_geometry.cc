@@ -28,7 +28,7 @@ void create_bone_mesh(Skeleton* skeleton) {
 void create_lattice(std::vector<glm::vec4> &vertices, std::vector<glm::vec4> normals, std::vector<glm::uvec3> &faces,
                     size_t detail) {
     size_t idx = vertices.size();
-    float stepsize = 1.0f / (float)detail;
+    float stepsize = 1.0f / (float)(detail-1);
 
     for(size_t i = 0; i < detail; i++) {
         for(size_t j = 0; j < detail; j++) {
