@@ -7,8 +7,8 @@
 #define GLSL_SKELETON_HPP
 
 #include <glm/glm.hpp>
+#include <unordered_map>
 #include <vector>
-
 
 /**
  * Class that represents the individual nodes in the skeleton tree
@@ -25,7 +25,7 @@ public:
 
 class Bone {
 public:
-    Bone(Joint* start, Joint* end, Bone* parent);
+    Bone(Joint* start, Joint* end, int identifier, Bone* parent = nullptr);
 
     void addChild(Bone* child);
     void addChildren(std::vector<Bone*> child);
@@ -39,6 +39,8 @@ public:
     ~Bone();
 
 private:
+    int id;
+
     Joint *startJoint, *endJoint;
 
     Bone* parent;
@@ -71,6 +73,7 @@ public:
     ~Skeleton();
 private:
     Bone* root;
+    std::unordered_map<int, Bone*> boneMap;
 };
 
 

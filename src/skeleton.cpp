@@ -19,8 +19,11 @@ Joint::~Joint() { }
  *============================== BONE ==================================
  *======================================================================*/
 
-Bone::Bone(Joint* start, Joint* end, Bone* parent)
-    : startJoint(start), endJoint(end), parent(parent), rot(1.0f), trans(1.0f), length(glm::length(endJoint->offset)) {
+Bone::Bone(Joint* start, Joint* end, int identifier, Bone* parent)
+    : startJoint(start), endJoint(end),
+      parent(parent), rot(1.0f), trans(1.0f),
+      length(glm::length(endJoint->offset)),
+      id(identifier) {
     // Rotation and translation matrix calculation
     updateBasis();
 }
@@ -157,9 +160,10 @@ Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>&
     // Inserts special joint at the origin
     joints.push_back(new Joint(glm::vec3(0.0f, 0.0f, 0.0f), -1));
 
-    root = new Bone(joints[joints.size() - 1], joints[rootJointIdx], nullptr);
+    root = new Bone(joints[joints.size() - 1], joints[rootJointIdx], 0, nullptr);
     std::vector<Bone*> rootBones = initializeBone(joints, rootJointIdx, root);
     root->addChildren(rootBones);
+    boneMap.insert({0, root});
 }
 
 std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone) {
@@ -168,12 +172,14 @@ std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int root
 
     std::vector<Bone*> result;
 
+    int boneId = 1;  // Skips over root bone
     for(size_t i = 0; i < joints.size(); i++) {
         Joint* j = joints[i];
         if(rootJointIdx == j->parent) {
             nextJoint = j;
 
-            Bone* currBone = new Bone(currJoint, nextJoint, rootBone);
+            Bone* currBone = new Bone(currJoint, nextJoint, boneId++, rootBone);
+            boneMap.insert({boneId, currBone});
 
             // Create the child bone before creating this one
             currBone->addChildren(initializeBone(joints, i, currBone));
