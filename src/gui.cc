@@ -13,7 +13,7 @@ namespace {
     // (0, 0, 0) and up direction (0, 1, 0).
     bool IntersectCylinder(const glm::vec3 &origin, const glm::vec3 &direction,
                            float radius, float height, float* t) {
-        //FIXME perform proper ray-cylinder collision detection
+        
         return true;
     }
 }

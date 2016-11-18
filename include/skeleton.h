@@ -34,6 +34,8 @@ public:
     glm::mat4 totalRotate();
     glm::mat4 totalTranslate();
 
+    bool intestects(glm::vec3 s, glm::vec3 dir, float r, float& t);
+
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
 
     ~Bone();
@@ -70,10 +72,13 @@ public:
     void compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
     void update_joints(std::vector<glm::vec4>& points);
 
+    Bone* intersectingBone(glm::vec3 s, glm::vec3 dir, float r);
+
     ~Skeleton();
 private:
     Bone* root;
     std::unordered_map<int, Bone*> boneMap;
+    std::vector<Bone*> boneList;
 };
 
 

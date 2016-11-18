@@ -106,6 +106,26 @@ glm::vec4 Bone::endWorld() {
     return glm::vec4(glm::vec3(startWorld()) + endJoint->offset, 1.0f);
 }
 
+bool Bone::intestects(glm::vec3 s, glm::vec3 dir, float r, float& t) {
+    glm::vec3 boneDir = endJoint->offset;
+    glm::vec3 boneStart = glm::vec3(startWorld());
+
+    glm::vec3 c = boneStart - s;
+
+    float denominator = glm::dot(dir, dir)*glm::dot(boneDir, boneDir) - glm::dot(dir, boneDir)*glm::dot(dir, boneDir);
+    float ta = (-glm::dot(dir, boneDir)*glm::dot(boneDir, c) + glm::dot(boneDir, c)*glm::dot(dir, dir)) / denominator;
+    float tb = (glm::dot(dir, boneDir)*glm::dot(boneDir, c) - glm::dot(boneDir, c)*glm::dot(dir, dir)) / denominator;
+
+    float distance = glm::length(s + dir*ta - boneStart - boneDir*ta);
+
+    if(ta >= 0 && tb >= 0 && tb <= 1 && distance < r) {
+        t = ta;
+        return true;
+    }
+
+    return false;
+}
+
 void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
     glm::vec4 startPoint = parentTransform * trans * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     glm::vec4 endPoint = parentTransform * trans * rot * glm::vec4(0.0f, 0.0f, length, 1.0f);
@@ -161,9 +181,12 @@ Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>&
     joints.push_back(new Joint(glm::vec3(0.0f, 0.0f, 0.0f), -1));
 
     root = new Bone(joints[joints.size() - 1], joints[rootJointIdx], 0, nullptr);
+
+    boneMap.insert({0, root});
+    boneList.push_back(root);
+
     std::vector<Bone*> rootBones = initializeBone(joints, rootJointIdx, root);
     root->addChildren(rootBones);
-    boneMap.insert({0, root});
 }
 
 std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone) {
@@ -180,6 +203,7 @@ std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int root
 
             Bone* currBone = new Bone(currJoint, nextJoint, boneId++, rootBone);
             boneMap.insert({boneId, currBone});
+            boneList.push_back(currBone);
 
             // Create the child bone before creating this one
             currBone->addChildren(initializeBone(joints, i, currBone));
@@ -191,6 +215,23 @@ std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int root
     return result;
 }
 
+Bone* Skeleton::intersectingBone(glm::vec3 s, glm::vec3 dir, float r) {
+    float finalT = std::numeric_limits::infinity();
+    Bone* result = nullptr;
+
+    for(auto it = boneList.begin(); it != boneList.end(); ++it) {
+        Bone* b = *it;
+        float t = 0;
+        if(b->intestects(s, dir, r, t)) {
+            if(t < finalT) {
+                finalT = t;
+                result = b;
+            }
+        }
+    }
+
+    return result;
+}
 
 void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
     root->compute_joints_r(points, lines, glm::mat4(1.0f));
