@@ -103,9 +103,21 @@ glm::mat4 Bone::totalTranslate() {
 }
 
 void Bone::roll(float theta) {
-    glm::mat4 rollRotate = glm::rotate(theta, tS);
-    nS = glm::normalize(glm::vec3(rollRotate * glm::vec4(nS, 0.0f)));
-    bS = glm::normalize(glm::vec3(rollRotate * glm::vec4(bS, 0.0f)));
+    glm::mat4 rollMat = glm::rotate(theta, tS);
+    nS = glm::normalize(glm::vec3(rollMat * glm::vec4(nS, 0.0f)));
+    bS = glm::normalize(glm::vec3(rollMat * glm::vec4(bS, 0.0f)));
+
+    S[0] = glm::vec4(bS, 0.0f);
+    S[1] = glm::vec4(nS, 0.0f);
+    S[2] = glm::vec4(tS, 0.0f);
+    S[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+void Bone::rotate(float rotation_speed_, glm::vec3 worldDrag) {
+    glm::mat4 rotateMat = glm::rotate(rotation_speed_, worldDrag);
+    tS = glm::normalize(glm::vec3(rotateMat * glm::vec4(tS, 0.0f)));
+    nS = glm::normalize(glm::vec3(rotateMat * glm::vec4(nS, 0.0f)));
+    bS = glm::normalize(glm::vec3(rotateMat * glm::vec4(bS, 0.0f)));
 
     S[0] = glm::vec4(bS, 0.0f);
     S[1] = glm::vec4(nS, 0.0f);
@@ -166,9 +178,8 @@ bool Bone::intersects(glm::vec3 s, glm::vec3 dir, float r, float &t) {
 }
 
 void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
-    glm::mat4 parentTrans = (parent == nullptr ? glm::mat4(1.0f) : parent->transform());
-    glm::vec4 startPoint = parentTrans * T * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    glm::vec4 endPoint = parentTrans * T * R * glm::vec4(0.0f, 0.0f, length, 1.0f);
+    glm::vec4 startPoint = parentTransform * T * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 endPoint = parentTransform * T * S * glm::vec4(0.0f, 0.0f, length, 1.0f);
 
     lines.push_back(glm::uvec2(points.size(), points.size() + 1));
     points.push_back(startPoint);
@@ -176,7 +187,7 @@ void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uve
 
     for(auto it = children.begin(); it != children.end(); ++it) {
         Bone* child = *it;
-        child->compute_joints_r(points, lines, parentTrans * T * R);
+        child->compute_joints_r(points, lines, parentTransform * T * S);
     }
 }
 

@@ -93,8 +93,12 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y) {
         up_ = glm::column(orientation_, 1);
         look_ = glm::column(orientation_, 2);
     } else if (drag_bone && current_bone_ != -1) {
-        // FIXME: Handle bone rotation
-        return;
+        glm::vec3 axis = glm::normalize(
+                glm::cross(look_,
+                glm::vec3(mouse_direction.y, -mouse_direction.x, 0.0f))
+        );
+        current_bone_ptr->rotate(rotation_speed_, axis);
+        pose_changed_ = true;
     }
 
     // Generate the appropriate vectors that represent the ray
@@ -102,14 +106,16 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y) {
     glm::vec3 q = glm::unProject(glm::vec3(current_x_, current_y_, 1), view_matrix_*model_matrix_, projection_matrix_, viewport);
     glm::vec3 dir = glm::normalize(q - p);
 
-    // Get the corresponding bone with which there is an intersection
-    Bone* b = mesh_->skeleton->intersectingBone(eye_, dir, kCylinderRadius);
-    if(b != nullptr) { // Bone exists, set index
-        current_bone_ = b->getId();
-        current_bone_ptr = b;
-    } else {
-        current_bone_ = -1;
-        current_bone_ptr = nullptr;
+    if(!drag_bone) {
+        // Get the corresponding bone with which there is an intersection
+        Bone* b = mesh_->skeleton->intersectingBone(eye_, dir, kCylinderRadius);
+        if(b != nullptr) { // Bone exists, set index
+            current_bone_ = b->getId();
+            current_bone_ptr = b;
+        } else {
+            current_bone_ = -1;
+            current_bone_ptr = nullptr;
+        }
     }
 
 }

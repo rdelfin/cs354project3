@@ -37,6 +37,7 @@ public:
     glm::mat4 totalTranslate();
 
     void roll(float theta);
+    void rotate(float rotation_speed_, glm::vec3 worldDrag);
 
     bool intersects(glm::vec3 s, glm::vec3 dir, float r, float &t);
 
