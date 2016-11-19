@@ -16,12 +16,12 @@
  */
 class Joint {
 public:
-    Joint(glm::vec3 offset, int parent);
+    Joint(glm::vec3 offset, int parent, int id);
 
     ~Joint();
 
     glm::vec3 offset;
-    int parent;
+    int parent, id;
 };
 
 static int BONE_ID = 0;
@@ -44,6 +44,9 @@ public:
 
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
 
+    void setWeights(const std::vector<float>& weights) { this->weights = weights; }
+    int getParentVertex() { return (startJoint == nullptr ? -1 : startJoint->id); }
+
     float getLength() { return length; }
     int getId() { return id; }
 
@@ -62,6 +65,8 @@ private:
     glm::vec4 startWorld();
     glm::vec4 endWorld();
 
+    std::vector<float> weights;
+
     glm::vec3 t, n, b;
     glm::vec3 tS, nS, bS;
     glm::mat4 T;
@@ -77,7 +82,7 @@ class Skeleton {
 public:
     Skeleton();
     Skeleton(Bone* root);
-    Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent, const std::vector<SparseTuple>& weights);
+    Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent, const std::vector<SparseTuple>& weights, size_t nVertices);
 
     std::vector<Bone*> initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone);
 
@@ -97,7 +102,9 @@ private:
     Bone* root;
     std::unordered_map<int, Bone*> boneMap;
     std::vector<Bone*> boneList;
-    std::vector<SparseTuple> weights;
+    std::vector<Joint*> joints;
+
+    std::vector<std::vector<float>> weightMatrix;
 };
 
 

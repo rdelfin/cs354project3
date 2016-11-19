@@ -60,7 +60,7 @@ void Mesh::loadpmd(const std::string& fn)
     std::vector<SparseTuple> weights;
     mr.getJointWeights(weights);
 
-    skeleton = new Skeleton(offsets, parents, weights);
+    skeleton = new Skeleton(offsets, parents, weights, vertices.size());
 
 
 

@@ -10,8 +10,8 @@
 /*======================================================================
  *============================ JOINT ===================================
  *======================================================================*/
-Joint::Joint(glm::vec3 offset, int parent)
-    : offset(glm::vec4(offset, 1.0f)), parent(parent) { }
+Joint::Joint(glm::vec3 offset, int parent, int id)
+    : offset(glm::vec4(offset, 1.0f)), parent(parent), id(id) { }
 
 Joint::~Joint() { }
 
@@ -215,23 +215,23 @@ Skeleton::Skeleton(Bone* root)
     : root(root) {
 }
 
-Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent, const std::vector<SparseTuple>& weights)
-	: weights(weights) {
-    std::vector<Joint*> joints;
+Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent,
+                   const std::vector<SparseTuple>& weights, size_t nVertices)  {
     size_t rootJointIdx = 0;
     root = nullptr;
+    std::unordered_multimap<int, int> jointToBone;
 
 
     size_t maxSize = std::max(offset.size(), parent.size());
     for(size_t i = 0; i < maxSize; i++) {
-        joints.push_back(new Joint(offset[i], parent[i]));
+        joints.push_back(new Joint(offset[i], parent[i], i));
         if(parent[i] == -1) {
             rootJointIdx = joints.size() - 1;
         }
     }
 
     // Inserts special joint at the origin
-    joints.push_back(new Joint(glm::vec3(0.0f, 0.0f, 0.0f), -1));
+    joints.push_back(new Joint(glm::vec3(0.0f, 0.0f, 0.0f), -1, joints.size()));
 
     root = new Bone(joints[joints.size() - 1], joints[rootJointIdx], nullptr);
 
@@ -240,6 +240,35 @@ Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>&
 
     std::vector<Bone*> rootBones = initializeBone(joints, rootJointIdx, root);
     root->addChildren(rootBones);
+
+    // Create joint-2-bone mapping
+    for(auto it = boneList.begin(); it != boneList.end(); ++it) {
+        Bone *b  = *it;
+        jointToBone.insert({b->getParentVertex(), b->getId()});
+    }
+
+    // Update weights appropriately
+    weightMatrix = std::vector<std::vector<float>>(boneList.size(), std::vector<float>(nVertices, 0));        // A matrix of (#bones)x(nVertices)
+
+    // Form the weightmatrix
+    for(auto it = weights.begin(); it != weights.end(); ++it) {
+        int jointId = it->jid;
+        int vertexId = it->vid;
+        double weight = it->weight;
+
+        if(jointToBone.count(jointId) <= 0)
+            std::cerr << "There was a joint (" << jointId << ") with no associated bone! Ignoring" << std::endl;
+
+        // Iterate over every bone with given jointID parent
+        for(auto bonesIt = jointToBone.find(jointId); bonesIt != jointToBone.end(); ++bonesIt) {
+            weightMatrix[bonesIt->second][vertexId] = weight;
+        }
+    }
+
+    // Set every bone's weight matrix
+    for(int i = 0; i < weightMatrix.size(); i++) {
+        boneMap[i]->setWeights(weightMatrix[i]);
+    }
 }
 
 std::vector<Bone*> Skeleton::initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone) {
