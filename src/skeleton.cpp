@@ -22,7 +22,8 @@ Joint::~Joint() { }
 
 Bone::Bone(Joint* start, Joint* end, Bone* parent)
     : startJoint(start), endJoint(end),
-      parent(parent), rot(1.0f), trans(1.0f),
+      parent(parent),
+      R(1.0f), T(1.0f), S(1.0f),
       length(glm::length(endJoint->offset)),
       id(BONE_ID++) {
     // Rotation and translation matrix calculation
@@ -41,7 +42,7 @@ void Bone::updateBasis() {
     glm::mat4 parentMInv = glm::inverse(parentM);
 
     glm::vec4 qVec = parentMInv*startWorld();
-    trans = glm::translate(glm::vec3(qVec));
+    T = glm::translate(glm::vec3(qVec));
 
     t = glm::normalize(glm::vec3(glm::transpose(parentR)*glm::vec4(endJoint->offset, 0.0f)));
     // n: first, set to t and replace smallest element with t. Then n = cross(n,t)
@@ -53,10 +54,16 @@ void Bone::updateBasis() {
 
     b = glm::normalize(glm::cross(t, n));
 
-    rot[0] = glm::vec4(b, 0.0f);
-    rot[1] = glm::vec4(n, 0.0f);
-    rot[2] = glm::vec4(t, 0.0f);
-    rot[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    R[0] = glm::vec4(b, 0.0f);
+    R[1] = glm::vec4(n, 0.0f);
+    R[2] = glm::vec4(t, 0.0f);
+    R[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Initialize S matrix and corresponding vectors
+    S = R;
+    tS = t;
+    nS = n;
+    bS = b;
 }
 
 void Bone::addChild(Bone* child) {
@@ -73,7 +80,7 @@ glm::mat4 Bone::transform() {
     if(parent != nullptr)
         result  = parent->transform() * result;
 
-    return result * trans * rot;
+    return result * T * S;
 }
 
 
@@ -83,7 +90,7 @@ glm::mat4 Bone::totalRotate() {
     if(parent != nullptr)
         result = parent->totalRotate() * result;
 
-    return result * rot;
+    return result * S;
 }
 
 glm::mat4 Bone::totalTranslate() {
@@ -92,7 +99,18 @@ glm::mat4 Bone::totalTranslate() {
     if(parent != nullptr)
         result = parent->totalTranslate() * result;
 
-    return result * trans;
+    return result * T;
+}
+
+void Bone::roll(float theta) {
+    glm::mat4 rollRotate = glm::rotate(theta, tS);
+    nS = glm::normalize(glm::vec3(rollRotate * glm::vec4(nS, 0.0f)));
+    bS = glm::normalize(glm::vec3(rollRotate * glm::vec4(bS, 0.0f)));
+
+    S[0] = glm::vec4(bS, 0.0f);
+    S[1] = glm::vec4(nS, 0.0f);
+    S[2] = glm::vec4(tS, 0.0f);
+    S[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 
@@ -149,8 +167,8 @@ bool Bone::intersects(glm::vec3 s, glm::vec3 dir, float r, float &t) {
 
 void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
     glm::mat4 parentTrans = (parent == nullptr ? glm::mat4(1.0f) : parent->transform());
-    glm::vec4 startPoint = parentTrans * trans * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    glm::vec4 endPoint = parentTrans * trans * rot * glm::vec4(0.0f, 0.0f, length, 1.0f);
+    glm::vec4 startPoint = parentTrans * T * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 endPoint = parentTrans * T * R * glm::vec4(0.0f, 0.0f, length, 1.0f);
 
     lines.push_back(glm::uvec2(points.size(), points.size() + 1));
     points.push_back(startPoint);
@@ -158,7 +176,7 @@ void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uve
 
     for(auto it = children.begin(); it != children.end(); ++it) {
         Bone* child = *it;
-        child->compute_joints_r(points, lines, parentTrans * trans * rot);
+        child->compute_joints_r(points, lines, parentTrans * T * R);
     }
 }
 

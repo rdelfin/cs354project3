@@ -48,7 +48,8 @@ void GUI::keyCallback(int key, int scancode, int action, int mods) {
             roll_speed = -roll_speed_;
         else
             roll_speed = roll_speed_;
-        // FIXME: actually roll the bone here
+        current_bone_ptr->roll(roll_speed);
+        pose_changed_ = true;
     } else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
         fps_mode_ = !fps_mode_;
     } else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {

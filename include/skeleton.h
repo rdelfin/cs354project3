@@ -36,6 +36,8 @@ public:
     glm::mat4 totalRotate();
     glm::mat4 totalTranslate();
 
+    void roll(float theta);
+
     bool intersects(glm::vec3 s, glm::vec3 dir, float r, float &t);
 
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
@@ -59,7 +61,10 @@ private:
     glm::vec4 endWorld();
 
     glm::vec3 t, n, b;
-    glm::mat4 trans, rot;
+    glm::vec3 tS, nS, bS;
+    glm::mat4 T;
+    glm::mat4 R;
+    glm::mat4 S;
 };
 
 

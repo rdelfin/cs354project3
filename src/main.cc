@@ -333,6 +333,10 @@ int main(int argc, char* argv[]) {
                 object_pass.updateVBO(0,
                                       mesh.animated_vertices.data(),
                                       mesh.animated_vertices.size());
+                mesh.skeleton->update_joints(skeleton_vertices);
+                skeleton_pass.updateVBO(0,
+                                        skeleton_vertices.data(),
+                                        skeleton_vertices.size());
 #if 0
                 // For debugging if you need it.
                 for (int i = 0; i < 4; i++) {
