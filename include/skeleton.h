@@ -37,12 +37,18 @@ public:
     glm::mat4 totalRotate();
     glm::mat4 totalTranslate();
 
+    glm::mat4 cachedDeformedTransform();
+    glm::mat4 undeformedTransform();
+
+    void dirtyDeformed();
+    void dirtyUndeformed();
+
     void roll(float theta);
     void rotate(float rotation_speed_, glm::vec3 worldDrag);
 
     bool intersects(glm::vec3 s, glm::vec3 dir, float r, float &t);
 
-    void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
+    void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
 
     void setWeights(const std::vector<float>& weights) { this->weights = weights; }
     int getParentVertex() { return (startJoint == nullptr ? -1 : startJoint->id); }
@@ -72,6 +78,10 @@ private:
     glm::mat4 T;
     glm::mat4 R;
     glm::mat4 S;
+
+    // Deformed and undeformed transform
+    bool dirtyD, dirtyU;
+    glm::mat4 D, U;
 };
 
 

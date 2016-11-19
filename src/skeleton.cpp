@@ -26,7 +26,8 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
       parent(parent),
       R(1.0f), T(1.0f), S(1.0f),
       length(glm::length(endJoint->offset)),
-      id(BONE_ID++) {
+      id(BONE_ID++),
+      dirtyD(true), dirtyU(true) {
     // Rotation and translation matrix calculation
     updateBasis();
 }
@@ -76,12 +77,17 @@ void Bone::addChildren(std::vector<Bone*> child) {
 }
 
 glm::mat4 Bone::transform() {
-    glm::mat4 result(1.0f);
+    if(dirtyD) {
+        D = glm::mat4(1.0f);
 
-    if(parent != nullptr)
-        result  = parent->transform() * result;
+        if (parent != nullptr)
+            D = parent->transform();
 
-    return result * T * S;
+        D = D * T * S;
+        dirtyD = false;
+    }
+
+    return D;
 }
 
 
@@ -103,6 +109,35 @@ glm::mat4 Bone::totalTranslate() {
     return result * T;
 }
 
+
+glm::mat4 Bone::undeformedTransform() {
+    if(dirtyU) {
+        glm::mat4 result(1.0f);
+
+        if(parent != nullptr)
+            result  = parent->transform() * result;
+
+        U = result * T * R;
+        dirtyU = false;
+    }
+
+    return U;
+}
+
+void Bone::dirtyDeformed() {
+    dirtyD = true;
+    for(auto child = children.begin(); child != children.end(); ++child) {
+        (*child)->dirtyDeformed();
+    }
+}
+
+void Bone::dirtyUndeformed() {
+    dirtyU = true;
+    for(auto child = children.begin(); child != children.end(); ++child) {
+        (*child)->dirtyUndeformed();
+    }
+}
+
 void Bone::roll(float theta) {
     glm::mat4 rollMat = glm::rotate(theta, tS);
     nS = glm::normalize(glm::vec3(rollMat * glm::vec4(nS, 0.0f)));
@@ -112,6 +147,8 @@ void Bone::roll(float theta) {
     S[1] = glm::vec4(nS, 0.0f);
     S[2] = glm::vec4(tS, 0.0f);
     S[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    dirtyDeformed(); // We changed the matrix S, so D must be updated
 }
 
 void Bone::rotate(float rotation_speed_, glm::vec3 worldDrag) {
@@ -124,6 +161,8 @@ void Bone::rotate(float rotation_speed_, glm::vec3 worldDrag) {
     S[1] = glm::vec4(nS, 0.0f);
     S[2] = glm::vec4(tS, 0.0f);
     S[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    dirtyDeformed(); // We changed the matrix S, so D must be updated
 }
 
 
@@ -178,9 +217,11 @@ bool Bone::intersects(glm::vec3 s, glm::vec3 dir, float r, float &t) {
     return false;
 }
 
-void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
-    glm::vec4 startPoint = parentTransform * T * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    glm::vec4 endPoint = parentTransform * T * S * glm::vec4(0.0f, 0.0f, length, 1.0f);
+void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
+    glm::mat4 parentTrans = (parent == nullptr ? glm::mat4(1.0f) : parent->transform());
+
+    glm::vec4 startPoint = parentTrans * T * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 endPoint = parentTrans * T * S * glm::vec4(0.0f, 0.0f, length, 1.0f);
 
     lines.push_back(glm::uvec2(points.size(), points.size() + 1));
     points.push_back(startPoint);
@@ -188,7 +229,7 @@ void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uve
 
     for(auto it = children.begin(); it != children.end(); ++it) {
         Bone* child = *it;
-        child->compute_joints_r(points, lines, parentTransform * T * S);
+        child->compute_joints_r(points, lines);
     }
 }
 
@@ -322,7 +363,7 @@ Bone* Skeleton::intersectingBone(glm::vec3 s, glm::vec3 dir, float r) {
 }
 
 void Skeleton::compute_joints(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines) {
-    root->compute_joints_r(points, lines, glm::mat4(1.0f));
+    root->compute_joints_r(points, lines);
 }
 
 void Skeleton::update_joints(std::vector<glm::vec4>& points) {
