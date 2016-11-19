@@ -48,7 +48,8 @@ void GUI::keyCallback(int key, int scancode, int action, int mods) {
             roll_speed = -roll_speed_;
         else
             roll_speed = roll_speed_;
-        current_bone_ptr->roll(roll_speed);
+        if(current_bone_ptr != nullptr)
+            current_bone_ptr->roll(roll_speed);
         pose_changed_ = true;
     } else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
         fps_mode_ = !fps_mode_;
