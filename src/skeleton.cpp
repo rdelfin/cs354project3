@@ -145,35 +145,6 @@ bool Bone::intersects(glm::vec3 s, glm::vec3 dir, float r, float &t) {
     }
 
     return false;
-
-    /*glm::mat4 W = glm::inverse(transform());
-
-    glm::vec4 transformed_p = W * glm::vec4(s, 1);
-    glm::vec4 transformed_ray = W * glm::vec4(dir, 0);
-    transformed_ray = glm::normalize(transformed_ray);
-
-    glm::vec2 twoD_p = glm::vec2(transformed_p.x, transformed_p.y);
-    glm::vec2 twoD_ray = glm::vec2(transformed_ray.x, transformed_ray.y);
-
-    float a = pow(twoD_ray.x, 2) + pow(twoD_ray.y, 2);
-    float b = 2*(twoD_p.x*(twoD_ray.x) + twoD_p.y*(twoD_ray.y));
-    float c = pow(twoD_p.x, 2) + pow(twoD_p.y, 2) - pow(r, 2);
-
-    float d = pow(b, 2) - 4*a*c;
-    if(d <= 0)
-        return false;
-    d = sqrt(d);
-    float t1 = (-b + d)/(2*a);
-    float t2 = (-b + d)/(2*a);
-    if((t1 >= 0 && (transformed_p + t1*transformed_ray).z >= 0
-            && (transformed_p + t1*transformed_ray).z <= length) ||
-            (t2 >= 0 && (transformed_p + t2*transformed_ray).z >= 0)
-            && (transformed_p + t2*transformed_ray).z <= length) {
-        t = std::min(t1, t2);
-        return true;
-    }
-
-    return false;*/
 }
 
 void Bone::compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform) {
