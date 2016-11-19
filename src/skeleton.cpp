@@ -27,7 +27,7 @@ Bone::Bone(Joint* start, Joint* end, Bone* parent)
       R(1.0f), T(1.0f), S(1.0f),
       length(glm::length(endJoint->offset)),
       id(BONE_ID++),
-      dirtyD(true), dirtyU(true) {
+      dirtyD(true), dirtyU(true), dirtyUInv(true) {
     // Rotation and translation matrix calculation
     updateBasis();
 }
@@ -124,6 +124,16 @@ glm::mat4 Bone::undeformedTransform() {
     return U;
 }
 
+glm::mat4 Bone::undeformedInvTransform() {
+    if(dirtyUInv) {
+        UInv = glm::inverse(undeformedTransform());
+        dirtyUInv = false;
+    }
+
+    return UInv;
+
+}
+
 void Bone::dirtyDeformed() {
     dirtyD = true;
     for(auto child = children.begin(); child != children.end(); ++child) {
@@ -132,6 +142,7 @@ void Bone::dirtyDeformed() {
 }
 
 void Bone::dirtyUndeformed() {
+    dirtyUInv = true;
     dirtyU = true;
     for(auto child = children.begin(); child != children.end(); ++child) {
         (*child)->dirtyUndeformed();
@@ -370,6 +381,22 @@ void Skeleton::update_joints(std::vector<glm::vec4>& points) {
     points.clear();
     std::vector<glm::uvec2> lines;
     compute_joints(points, lines);
+}
+
+
+void Skeleton::update_mesh_vertices(std::vector<glm::vec4>& animatedVertices) {
+    for(size_t i = 0; i < animatedVertices.size(); i++) {
+        glm::mat4 totalM(0.0f);
+
+        for(size_t j = 0; j < weightMatrix.size(); j++) {
+            if(weightMatrix[j][i] != 0) {
+                totalM = totalM + weightMatrix[j][i] * boneMap[j]->transform()
+                                  * boneMap[j]->undeformedInvTransform();
+            }
+        }
+
+        animatedVertices[i] = totalM * animatedVertices[i];
+    }
 }
 
 Skeleton::~Skeleton() {

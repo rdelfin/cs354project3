@@ -39,6 +39,7 @@ public:
 
     glm::mat4 cachedDeformedTransform();
     glm::mat4 undeformedTransform();
+    glm::mat4 undeformedInvTransform();
 
     void dirtyDeformed();
     void dirtyUndeformed();
@@ -80,8 +81,8 @@ private:
     glm::mat4 S;
 
     // Deformed and undeformed transform
-    bool dirtyD, dirtyU;
-    glm::mat4 D, U;
+    bool dirtyD, dirtyU, dirtyUInv;
+    glm::mat4 D, U, UInv;
 };
 
 
@@ -106,6 +107,8 @@ public:
     int getNumberOfBones() {
         return boneList.size();
     }
+
+    void update_mesh_vertices(std::vector<glm::vec4>& animatedVertices);
 
     ~Skeleton();
 private:

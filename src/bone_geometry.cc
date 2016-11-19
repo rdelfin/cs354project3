@@ -69,8 +69,7 @@ void Mesh::loadpmd(const std::string& fn)
 void Mesh::updateAnimation()
 {
     animated_vertices = vertices;
-    // FIXME: blend the vertices to animated_vertices, rather than copy
-    //        the data directly.
+    skeleton->update_mesh_vertices(animated_vertices);
 }
 
 
