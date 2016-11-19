@@ -34,7 +34,6 @@ void GUI::keyCallback(int key, int scancode, int action, int mods) {
         return;
     }
     if (key == GLFW_KEY_J && action == GLFW_RELEASE) {
-        double bytes = window_width_*window_height_*3;
         unsigned char* buffer = new unsigned char[window_width_*window_height_*3];
         glReadPixels(0, 0, window_width_, window_height_, GL_RGB, GL_UNSIGNED_BYTE, buffer);
         SaveJPEG("screenshot.jpg", window_width_, window_height_, buffer);
