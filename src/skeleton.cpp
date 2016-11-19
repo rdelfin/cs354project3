@@ -3,6 +3,7 @@
 #include <queue>
 #include <stack>
 #include <iostream>
+#include <mmdadapter.h>
 #include "skeleton.h"
 #include "config.h"
 

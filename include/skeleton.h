@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <unordered_map>
 #include <vector>
+#include <mmdadapter.h>
 
 /**
  * Class that represents the individual nodes in the skeleton tree
