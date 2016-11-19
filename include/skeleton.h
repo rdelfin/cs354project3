@@ -23,9 +23,11 @@ public:
     int parent;
 };
 
+static int BONE_ID = 0;
+
 class Bone {
 public:
-    Bone(Joint* start, Joint* end, int identifier, Bone* parent = nullptr);
+    Bone(Joint* start, Joint* end, Bone* parent = nullptr);
 
     void addChild(Bone* child);
     void addChildren(std::vector<Bone*> child);
@@ -34,11 +36,12 @@ public:
     glm::mat4 totalRotate();
     glm::mat4 totalTranslate();
 
-    bool intestects(glm::vec3 s, glm::vec3 dir, float r, float& t);
+    bool intersects(glm::vec3 s, glm::vec3 dir, float r, float &t);
 
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines, glm::mat4 parentTransform);
 
     float getLength() { return length; }
+    int getId() { return id; }
 
     ~Bone();
 

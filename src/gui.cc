@@ -97,8 +97,21 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y) {
         return;
     }
 
-    // FIXME: highlight bones that have been moused over
-    current_bone_ = -1;
+    // Generate the appropriate vectors that represent the ray
+    glm::vec3 p = glm::unProject(glm::vec3(current_x_, current_y_, 0), view_matrix_*model_matrix_, projection_matrix_, viewport);
+    glm::vec3 q = glm::unProject(glm::vec3(current_x_, current_y_, 1), view_matrix_*model_matrix_, projection_matrix_, viewport);
+    glm::vec3 dir = glm::normalize(q - p);
+
+    // Get the corresponding bone with which there is an intersection
+    Bone* b = mesh_->skeleton->intersectingBone(eye_, dir, kCylinderRadius);
+    if(b != nullptr) { // Bone exists, set index
+        current_bone_ = b->getId();
+        current_bone_ptr = b;
+    } else {
+        current_bone_ = -1;
+        current_bone_ptr = nullptr;
+    }
+
 }
 
 void GUI::mouseButtonCallback(int button, int action, int mods) {
