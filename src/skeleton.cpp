@@ -214,7 +214,8 @@ Skeleton::Skeleton(Bone* root)
     : root(root) {
 }
 
-Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent) {
+Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent, const std::vector<SparseTuple>& weights)
+	: weights(weights) {
     std::vector<Joint*> joints;
     size_t rootJointIdx = 0;
     root = nullptr;

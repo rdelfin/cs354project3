@@ -76,7 +76,7 @@ class Skeleton {
 public:
     Skeleton();
     Skeleton(Bone* root);
-    Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent);
+    Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>& parent, const std::vector<SparseTuple>& weights);
 
     std::vector<Bone*> initializeBone(std::vector<Joint*> joints, int rootJointIdx, Bone* rootBone);
 
@@ -96,6 +96,7 @@ private:
     Bone* root;
     std::unordered_map<int, Bone*> boneMap;
     std::vector<Bone*> boneList;
+    std::vector<SparseTuple> weights;
 };
 
 

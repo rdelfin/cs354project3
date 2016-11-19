@@ -57,9 +57,13 @@ void Mesh::loadpmd(const std::string& fn)
         parents.push_back(parent);
     }
 
-    skeleton = new Skeleton(offsets, parents);
+    std::vector<SparseTuple> weights;
+    mr.getJointWeights(weights);
 
-    // TODO: add blend weights from PMD file
+    skeleton = new Skeleton(offsets, parents, weights);
+
+
+
 }
 
 void Mesh::updateAnimation()
