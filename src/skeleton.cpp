@@ -379,19 +379,21 @@ void Skeleton::update_joints(std::vector<glm::vec4>& points) {
 }
 
 
-void Skeleton::update_mesh_vertices(std::vector<glm::vec4>& animatedVertices) {
-    for(size_t i = 0; i < animatedVertices.size(); i++) {
-        glm::mat4 totalM(0.0f);
+void Skeleton::update_deformation_matrices(std::vector<float>& weights,
+                                           std::vector<glm::mat4>& boneMatrices,
+                                           int maxBones) {
+    weights.clear();
+    boneMatrices.clear();
+    weights = std::vector<float>(weightMatrix.size()*maxBones,0);
+    boneMatrices = std::vector<glm::mat4>(maxBones, glm::mat4(0.0f));
 
-        for(size_t j = 0; j < weightMatrix[i].size(); j++) {
-            if(weightMatrix[i][j] != 0) {
-                totalM = totalM + weightMatrix[i][j] * boneMap[j]->transform()
-                                  * boneMap[j]->undeformedInvTransform();
-            }
-        }
+    for(size_t i = 0; i < boneList.size(); i++) {
+        for(size_t j = 0; j < weightMatrix[i].size(); j++)
+            weights[i*maxBones + j] = weightMatrix[i][j];
 
-        animatedVertices[i] = totalM * animatedVertices[i];
+        boneMatrices[i] = boneMap[i]->transform() * boneMap[i]->undeformedInvTransform();
     }
+
 }
 
 Skeleton::~Skeleton() {

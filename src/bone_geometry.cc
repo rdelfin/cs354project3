@@ -69,7 +69,7 @@ void Mesh::loadpmd(const std::string& fn)
 void Mesh::updateAnimation()
 {
     animated_vertices = vertices;
-    skeleton->update_mesh_vertices(animated_vertices);
+    skeleton->update_deformation_matrices(flattened_weights, bone_animation_matrices, kMaxBones);
 }
 
 

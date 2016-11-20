@@ -12,7 +12,7 @@ class Mesh;
  * Hint: call glUniformMatrix4fv on thest pointers
  */
 struct MatrixPointers {
-    const float *projection, *model, *view;
+    const float *projection, *model, *view, *bone_animation_matrices, *flattened_weights;
 };
 
 class GUI {

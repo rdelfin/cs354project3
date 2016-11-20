@@ -107,7 +107,7 @@ public:
         return boneList.size();
     }
 
-    void update_mesh_vertices(std::vector<glm::vec4>& animatedVertices);
+    void update_deformation_matrices(std::vector<float>& weights, std::vector<glm::mat4>& boneMatrices, int maxBones);
 
     ~Skeleton();
 private:

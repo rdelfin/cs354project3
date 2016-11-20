@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(loc, 1, GL_FALSE, (const GLfloat*) data);
     };
     auto skeleton_matrix_binder = [&mesh](int loc, const void* data) {
-        auto nelem = mesh.getNumberOfBones();
+        auto nelem = kMaxBones;
         glUniformMatrix4fv(loc, nelem, GL_FALSE, (const GLfloat*) data);
     };
     auto vector_binder = [](int loc, const void* data) {
@@ -155,6 +155,10 @@ int main(int argc, char* argv[]) {
     };
     auto float_binder = [](int loc, const void* data) {
         glUniform1fv(loc, 1, (const GLfloat*) data);
+    };
+    auto weight_binder = [&mesh](int loc, const void* data) {
+        auto nelem = kMaxBones * mesh.vertices.size();
+        glUniform1fv(loc, nelem, (const GLfloat*) data);
     };
     /*
      * These lambda functions below are used to retrieve data
@@ -170,6 +174,12 @@ int main(int argc, char* argv[]) {
     auto skeleton_model_data = [&skeleton_model_matrix]() -> const void* {
         return &skeleton_model_matrix[0][0];
     }; // This return model matrix for the floor.
+    auto skeleton_skin_model_data = [&mats]() -> const void* {
+        return mats.bone_animation_matrices;
+    };
+    auto weight_data = [&mats]() -> const void* {
+        return mats.flattened_weights;
+    };
     auto std_view_data = [&mats]() -> const void* {
         return mats.view;
     };
@@ -214,6 +224,8 @@ int main(int argc, char* argv[]) {
     ShaderUniform std_light = {"light_position", vector_binder, std_light_data};
     ShaderUniform object_alpha = {"alpha", float_binder, alpha_data};
     ShaderUniform cylinder_radius = {"radius", float_binder, radius_data};
+    ShaderUniform animation_model = {"skeleton_mat", skeleton_matrix_binder, skeleton_skin_model_data};
+    ShaderUniform weights_uniform = {"weights", weight_binder, weight_data};
 
     std::vector<glm::vec2> &uv_coordinates = mesh.uv_coordinates;
     RenderDataInput object_pass_input;
@@ -230,6 +242,7 @@ int main(int argc, char* argv[]) {
                                    fragment_shader
                            },
                            {std_model, std_view, std_proj,
+                            animation_model, weights_uniform,
                             std_light,
                             std_camera, object_alpha},
                            {"fragment_color"}
@@ -305,6 +318,8 @@ int main(int argc, char* argv[]) {
 
         gui.updateMatrices();
         mats = gui.getMatrixPointers();
+        mats.bone_animation_matrices = (float*)mesh.bone_animation_matrices.data();
+        mats.flattened_weights = mesh.flattened_weights.data();
 
         int current_bone = gui.getCurrentBone();
 #if 1
@@ -330,9 +345,9 @@ int main(int argc, char* argv[]) {
         if (draw_object) {
             if (gui.isPoseDirty()) {
                 mesh.updateAnimation();
-                object_pass.updateVBO(0,
+                /*object_pass.updateVBO(0,
                                       mesh.animated_vertices.data(),
-                                      mesh.animated_vertices.size());
+                                      mesh.animated_vertices.size());*/
                 mesh.skeleton->update_joints(skeleton_vertices);
                 skeleton_pass.updateVBO(0,
                                         skeleton_vertices.data(),

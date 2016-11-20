@@ -28,6 +28,8 @@ struct Mesh {
     std::vector<glm::vec4> face_normals;
     std::vector<glm::vec2> uv_coordinates;
     std::vector<Material> materials;
+    std::vector<glm::mat4> bone_animation_matrices;
+    std::vector<float> flattened_weights;
     BoundingBox bounds;
     Skeleton* skeleton;
 
