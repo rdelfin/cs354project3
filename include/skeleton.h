@@ -51,7 +51,6 @@ public:
 
     void compute_joints_r(std::vector<glm::vec4>& points, std::vector<glm::uvec2>& lines);
 
-    void setWeights(const std::vector<float>& weights) { this->weights = weights; }
     int getParentVertex() { return (startJoint == nullptr ? -1 : startJoint->id); }
 
     float getLength() { return length; }

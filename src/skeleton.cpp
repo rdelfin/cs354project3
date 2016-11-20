@@ -300,7 +300,7 @@ Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>&
     }
 
     // Update weights appropriately
-    weightMatrix = std::vector<std::vector<float>>(boneList.size(), std::vector<float>(nVertices, 0));        // A matrix of (#bones)x(nVertices)
+    weightMatrix = std::vector<std::vector<float>>(nVertices, std::vector<float>(boneList.size(), 0));        // A matrix of (#bones)x(nVertices)
 
     // Form the weightmatrix
     for(auto it = weights.begin(); it != weights.end(); ++it) {
@@ -313,13 +313,8 @@ Skeleton::Skeleton(const std::vector<glm::vec3>& offset, const std::vector<int>&
 
         // Iterate over every bone with given jointID parent
         for(auto bonesIt = jointToBone.find(jointId); bonesIt != jointToBone.end(); ++bonesIt) {
-            weightMatrix[bonesIt->second][vertexId] = weight;
+            weightMatrix[vertexId][bonesIt->second] = weight;
         }
-    }
-
-    // Set every bone's weight matrix
-    for(int i = 0; i < weightMatrix.size(); i++) {
-        boneMap[i]->setWeights(weightMatrix[i]);
     }
 }
 
@@ -388,9 +383,9 @@ void Skeleton::update_mesh_vertices(std::vector<glm::vec4>& animatedVertices) {
     for(size_t i = 0; i < animatedVertices.size(); i++) {
         glm::mat4 totalM(0.0f);
 
-        for(size_t j = 0; j < weightMatrix.size(); j++) {
-            if(weightMatrix[j][i] != 0) {
-                totalM = totalM + weightMatrix[j][i] * boneMap[j]->transform()
+        for(size_t j = 0; j < weightMatrix[i].size(); j++) {
+            if(weightMatrix[i][j] != 0) {
+                totalM = totalM + weightMatrix[i][j] * boneMap[j]->transform()
                                   * boneMap[j]->undeformedInvTransform();
             }
         }
