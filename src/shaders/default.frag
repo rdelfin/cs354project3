@@ -1,5 +1,4 @@
-R"zzz(
-#version 330 core
+R"zzz(#version 330 core
 in vec4 face_normal;
 in vec4 vertex_normal;
 in vec4 light_direction;
